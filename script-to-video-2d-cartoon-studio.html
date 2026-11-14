@@ -1,0 +1,1393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Script to Video 2D Cartoon Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f4; --surface:#ffffff; --surface2:#eef3ee; --ink:#14231a; --muted:#5b6b5f;
+  --line:#d8e2d8; --green:#0b7a37; --green-dark:#075c29; --green-soft:#e2f3e7;
+  --amber:#b45309; --amber-soft:#fef3c7; --red:#b42318; --red-soft:#fee4e2;
+  --blue:#175cd3; --blue-soft:#e0ebff; --radius:14px;
+  --shadow:0 1px 2px rgba(16,40,24,.06),0 8px 24px rgba(16,40,24,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0e1511; --surface:#16211a; --surface2:#1c2a21; --ink:#e8f0ea; --muted:#9db3a5;
+  --line:#2b3d31; --green:#22a355; --green-dark:#35bd68; --green-soft:#173a26;
+  --amber-soft:#3a2c10; --red-soft:#3d1a16; --blue-soft:#16294d; --shadow:0 1px 2px rgba(0,0,0,.4);}
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Hind","Noto Sans Devanagari",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;-webkit-text-size-adjust:100%}
+button,[role="button"],select,summary,input:not([type="checkbox"]){min-height:44px}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+textarea{line-height:1.55}
+a{color:var(--green)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 64px}
+
+/* Header */
+.topbar{background:var(--green-dark);color:#fff;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.topbar-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:.2px}
+.brand .mark{width:36px;height:36px;border-radius:9px;background:#fff;color:var(--green-dark);display:grid;place-items:center;font-size:19px;flex:none}
+.topnav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.topnav button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:8px 16px;font-size:15px;font-weight:600;min-height:40px}
+.topnav button.active{background:#fff;color:var(--green-dark);border-color:#fff}
+.topnav button:hover{background:rgba(255,255,255,.22)}
+.topnav button.active:hover{background:#fff}
+
+.hero{margin:22px 0 6px}
+.hero h1{font-size:clamp(26px,4.5vw,40px);line-height:1.12;margin:0 0 8px;font-weight:700}
+.hero h1 .hl{color:var(--green)}
+.hero p{margin:0;color:var(--muted);font-size:17px;max-width:720px}
+.honest{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--green);border-radius:10px;padding:12px 14px;font-size:14.5px;color:var(--muted);max-width:820px}
+.honest b{color:var(--ink)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card h2{margin:0 0 4px;font-size:21px}
+.card h3{margin:0 0 6px;font-size:17px}
+.sub{color:var(--muted);font-size:14.5px;margin:0 0 12px}
+.grid{display:grid;gap:16px}
+.grid2{grid-template-columns:1fr}
+@media(min-width:860px){.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:repeat(3,1fr)}}
+.grid3{grid-template-columns:1fr}
+@media(min-width:640px){.grid3{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:960px){.grid3{grid-template-columns:repeat(3,1fr)}}
+.stack{display:grid;gap:16px;margin-top:16px}
+
+label.flabel{display:block;font-weight:600;font-size:14px;margin:12px 0 6px}
+label.flabel:first-child{margin-top:0}
+.inp,select.inp,textarea.inp{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:11px 12px}
+.inp:focus{outline:2px solid var(--green);outline-offset:1px;border-color:var(--green)}
+textarea.inp{resize:vertical}
+
+.btn{border:0;border-radius:10px;padding:12px 20px;font-size:16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:var(--green-dark)}
+.btn-big{width:100%;padding:17px 20px;font-size:19px;border-radius:12px;box-shadow:0 6px 18px rgba(11,122,55,.3)}
+.btn-outline{background:var(--surface);color:var(--ink);border:1.5px solid var(--line)}
+.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.btn-ghost{background:var(--surface2);color:var(--ink);border:1px solid var(--line)}
+.btn-danger{background:var(--red-soft);color:var(--red);border:1px solid var(--red)}
+.btn-sm{padding:8px 13px;font-size:14px;min-height:40px;border-radius:8px}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btnrow .btn{flex:1 1 auto}
+
+.fmtoggle{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fmtoggle button{background:var(--surface2);border:2px solid var(--line);border-radius:12px;padding:14px 10px;font-size:16px;font-weight:700;color:var(--ink);min-height:64px}
+.fmtoggle button small{display:block;font-weight:500;color:var(--muted);font-size:13px;margin-top:2px}
+.fmtoggle button.sel{border-color:var(--green);background:var(--green-soft);color:var(--green-dark)}
+@media (prefers-color-scheme: dark){.fmtoggle button.sel{color:#7fe0a3}}
+
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:700;vertical-align:middle}
+.pill-auto{background:var(--amber-soft);color:var(--amber);border:1px solid #f2c14e}
+.pill-lock{background:var(--green-soft);color:var(--green-dark);border:1px solid var(--green)}
+@media (prefers-color-scheme: dark){.pill-lock{color:#7fe0a3}}
+.pill-fmt{background:var(--blue-soft);color:var(--blue)}
+.pill-manual{background:var(--surface2);color:var(--muted);border:1px solid var(--line)}
+
+.proj-card{display:flex;flex-direction:column;gap:6px}
+.proj-card .meta{color:var(--muted);font-size:13.5px}
+.proj-card .actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.empty{border:2px dashed var(--line);border-radius:var(--radius);padding:28px 18px;text-align:center;color:var(--muted)}
+
+/* Pipeline steps */
+.steps{display:grid;gap:8px;margin-top:14px}
+.step{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px}
+.step .dot{width:26px;height:26px;border-radius:50%;background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:800;flex:none;margin-top:1px}
+.step.done .dot{background:var(--green);border-color:var(--green);color:#fff}
+.step.done{border-color:var(--green)}
+.step small{display:block;color:var(--muted);font-size:13px}
+
+/* Player */
+.playerbox{background:#0b120d;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.canvaswrap{position:relative;width:100%;background:#000}
+.canvaswrap canvas{display:block;width:100%;height:auto}
+.canvaswrap.r169{aspect-ratio:16/9}.canvaswrap.r916{aspect-ratio:9/16;max-width:420px;margin:0 auto}
+.pcontrols{background:#131f17;color:#e8f0ea;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.pbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pbtns button{background:#223528;color:#fff;border:1px solid #35543f;border-radius:9px;padding:10px 15px;font-weight:700;font-size:15px;min-height:44px}
+.pbtns button.primary{background:var(--green);border-color:var(--green)}
+.pbtns button:hover{filter:brightness(1.15)}
+.progress{height:10px;background:#2a3d2f;border-radius:99px;overflow:hidden}
+.progress>i{display:block;height:100%;background:#35bd68;width:0%;transition:width .25s}
+.pmeta{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;color:#b9cec0;flex-wrap:wrap}
+.recbar{display:none;background:#3d1410;color:#ffd9d4;border:1px solid #7a2a20;border-radius:10px;padding:10px 12px;font-size:14.5px}
+.recbar.show{display:block}
+
+/* Scene timeline */
+.scene-card{border:2px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);cursor:pointer}
+.scene-card.sel{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+.scene-card .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.scene-card .num{background:var(--green);color:#fff;font-weight:800;border-radius:8px;padding:2px 9px;font-size:13.5px}
+.scene-card .dlg{font-family:"Noto Sans Devanagari","Hind",sans-serif;font-size:15.5px;margin:8px 0 4px}
+.scene-card .who{font-size:13px;color:var(--muted)}
+.scene-card .rowbtns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.iconbtn{background:var(--surface2);border:1px solid var(--line);border-radius:8px;min-width:40px;min-height:40px;font-size:16px;font-weight:700;color:var(--ink);padding:6px 10px}
+.iconbtn:hover{border-color:var(--green)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600}
+
+/* Library */
+.libgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:700px){.libgrid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.libgrid{grid-template-columns:repeat(4,1fr)}}
+.libitem{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);text-align:center;padding-bottom:10px}
+.libitem canvas{width:100%;height:auto;display:block;background:#dcefe2}
+.libitem .nm{font-weight:700;font-size:15px;margin-top:8px;padding:0 6px}
+.libitem .ds{font-size:12.5px;color:var(--muted);padding:0 8px}
+.libitem .vc{font-size:12px;margin-top:4px}
+
+select.inp{appearance:auto}
+input[type=range]{width:100%;accent-color:var(--green);min-height:32px}
+input[type=color]{width:64px;height:44px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);padding:4px}
+input[type=file]{width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.two{grid-template-columns:1fr}}
+details.more{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:6px 16px 16px}
+details.more summary{font-weight:700;font-size:16px;padding:10px 0;cursor:pointer;min-height:44px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:#10231a;color:#eafff1;padding:13px 20px;border-radius:12px;font-size:15.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:92vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hidden{display:none!important}
+.mt{margin-top:16px}.mb{margin-bottom:8px}
+.small{font-size:13.5px;color:var(--muted)}
+.kbd{background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:13px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="mark">🎬</span> Cartoon Studio</div>
+    <nav class="topnav">
+      <button id="navDash" class="active" type="button">Dashboard</button>
+      <button id="navStudio" type="button">Studio</button>
+      <button id="navLib" type="button">Characters &amp; Backgrounds</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ DASHBOARD VIEW ============ -->
+  <section id="viewDash">
+    <div class="hero">
+      <h1>Script daalo, <span class="hl">video apne aap</span> ban jayega</h1>
+      <p>Hindi / Hinglish script paste karo, ek button dabao — scenes, characters, backgrounds, animation aur awaaz, sab script se apne aap set ho jayenge. Phir video download kar lo.</p>
+      <div class="honest"><b>Sach baat:</b> Ye tool browser ke andar bane hue flat 2D cartoon characters aur backgrounds use karta hai — isliye koi login, credits ya paisa nahi lagta, aur har cheez turant, apne aap hoti hai. Characters procedural drawing se bante hain, AI image API se nahi.</div>
+    </div>
+
+    <div class="grid grid2">
+      <div class="card">
+        <h2>Naya Project</h2>
+        <p class="sub">Pehle project banao, phir Studio me script daal ke video banao.</p>
+        <label class="flabel" for="npName">Project ka naam</label>
+        <input class="inp" id="npName" type="text" placeholder="Jaise: Chalak Bandar ki Kahani" maxlength="60">
+        <label class="flabel">Video format</label>
+        <div class="fmtoggle" id="npFmt">
+          <button type="button" data-fmt="16:9" class="sel">16 : 9 — Landscape<small>YouTube long video ke liye</small></button>
+          <button type="button" data-fmt="9:16">9 : 16 — Portrait<small>Shorts / Reels ke liye</small></button>
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-green" id="btnCreate" type="button">＋ Project Banao aur Studio Kholo</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Sample se try karo</h2>
+        <p class="sub">Ek click me poora automatic flow dekh lo — sample kahani pehle se Studio me load ho jayegi.</p>
+        <p style="font-size:15.5px;margin:6px 0"><b>Chalak Bandar aur Lalchi Magarmachh</b> — lagbhag 1 minute ki kahani, 10 scenes. Bandar, magarmachh, gaon, nadi, jungle — sab script se auto detect hoga.</p>
+        <div class="btnrow">
+          <button class="btn btn-green" id="btnSampleDash" type="button">▶ Sample Script Try Karo</button>
+        </div>
+        <p class="small">Note: Awaaz sunne ke liye Preview me Play dabana hoga (browser awaaz tabhi chalata hai jab tum khud button dabao).</p>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <h2>Mere Projects</h2>
+      <p class="sub">Projects isi browser me save rehte hain (localStorage) — koi login nahi chahiye. Browser data clear karne se projects mit jayenge, isliye important video time par download kar lo.</p>
+      <div class="grid grid3" id="projList"></div>
+      <div class="empty hidden" id="projEmpty">Abhi koi project nahi hai. Upar se pehla project banao — ya sample try karo.</div>
+    </div>
+  </section>
+
+  <!-- ============ STUDIO VIEW ============ -->
+  <section id="viewStudio" class="hidden">
+    <div class="card mt" style="margin-top:22px">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" id="btnBack" type="button">← Dashboard</button>
+        <input class="inp" id="projName" type="text" style="flex:1 1 220px;font-weight:700;font-size:17px" maxlength="60" aria-label="Project name">
+        <span class="pill pill-fmt" id="projFmt">16:9</span>
+        <span class="pill pill-lock" id="projSaved">✓ Saved</span>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <h2>1 · Apni Script Daalo</h2>
+      <p class="sub">Har line ek scene banegi. Speaker aise likho — <span class="kbd">Aman: Tum kaise ho?</span> ya <span class="kbd">Narrator: Ek gaon me…</span> Bina naam wali line Narrator ki maani jayegi.</p>
+      <textarea class="inp" id="scriptInput" rows="9" placeholder="Yahan apni Hindi / Hinglish script paste karo…&#10;&#10;Narrator: Ek chhote se gaon me Aman naam ka ladka rehta tha.&#10;Aman: Aaj main nadi ki taraf khelne jaunga!&#10;Bandar: Ruko Aman, ped par chalo, wahan aam lage hain!"></textarea>
+      <div class="btnrow">
+        <button class="btn btn-outline" id="btnSample" type="button">Sample Script Try Karo</button>
+        <button class="btn btn-outline" id="btnClearScript" type="button">Script Saaf Karo</button>
+      </div>
+      <button class="btn btn-green btn-big mt" id="btnAuto" type="button">🎬 &nbsp;Script se Video Banao — Ek Click, Sab Automatic</button>
+      <div class="steps" id="pipeSteps">
+        <div class="step" data-step="split"><span class="dot">1</span><div><b>Auto Scene Split</b><small>Script speaker / paragraph / sentence se scenes me tootegi, har scene ~8–10 second</small></div></div>
+        <div class="step" data-step="char"><span class="dot">2</span><div><b>Auto Character + Lock</b><small>39 characters — Doctor, Nurse, Police, Inspector, Chor, Fire Fighter, Fauji, Pilot, Chef, Judge, Vakil, Superhero… Naam se character apne aap milega aur poori video me wahi rahega — kabhi badlega nahi</small></div></div>
+        <div class="step" data-step="bg"><span class="dot">3</span><div><b>Auto Background</b><small>Gaon, ghar, bazaar, nadi, jungle, raat, aspatal, thana, kachehri — scene ke shabdon se background chuna jayega</small></div></div>
+        <div class="step" data-step="anim"><span class="dot">4</span><div><b>Auto Animation</b><small>Chal, bol, so, baith, wave — verb se character ki harkat set hogi</small></div></div>
+        <div class="step" data-step="voice"><span class="dot">5</span><div><b>Auto Voiceover</b><small>Har speaker ki alag Hindi awaaz — Narrator gehra/dheema, bachcha uncha, buddha aur gehra. Awaaz kabhi swap nahi hogi</small></div></div>
+        <div class="step" data-step="render"><span class="dot">6</span><div><b>Auto Timeline + Render</b><small>Scenes ek ke baad ek chalenge, phir Video Download Karo se file milegi</small></div></div>
+      </div>
+    </div>
+
+    <div class="stack" id="studioMain">
+      <div class="card">
+        <h2>2 · Preview Player</h2>
+        <p class="sub">Play dabao — scenes ek ke baad ek chalenge, dialogue Hindi awaaz me bolega, aur scene ka text screen par dikhega.</p>
+        <div class="playerbox">
+          <div class="canvaswrap r169" id="canvasWrap">
+            <canvas id="stage" width="1280" height="720"></canvas>
+          </div>
+          <div class="pcontrols">
+            <div class="progress"><i id="progFill"></i></div>
+            <div class="pmeta"><span id="progText">Scene 0 / 0</span><span id="voiceStatus">Awaaz: browser Hindi voice (Play par chalegi)</span></div>
+            <div class="pbtns">
+              <button class="primary" id="btnPlay" type="button">▶ Play — Poori Video</button>
+              <button id="btnPause" type="button">⏸ Pause</button>
+              <button id="btnPrev" type="button">⏮ Pichla Scene</button>
+              <button id="btnNext" type="button">⏭ Agla Scene</button>
+              <button id="btnMute" type="button">🔊 Awaaz On</button>
+            </div>
+            <div class="recbar" id="recBar">● Recording ho rahi hai… <span id="recText"></span> — tab band mat karo.</div>
+          </div>
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-green" id="btnExportVideo" type="button">⬇ Video Download Karo (WebM)</button>
+          <button class="btn btn-outline" id="btnExportScript" type="button">Script .txt Download</button>
+        </div>
+        <p class="small">Export note: Download hone wali video me animation aur screen-text aayega. Browser ki boli hui awaaz (Speech) recording me capture nahi hoti — awaaz Preview Play me live sunai deti hai. Video file WebM format me milegi (Chrome/Edge me best chalti hai; zyada tar editor aur player support karte hain).</p>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <h2 style="flex:1 1 auto">3 · Timeline — Scenes</h2>
+          <button class="btn btn-ghost btn-sm" id="btnAddScene" type="button">＋ Scene Jodo (Manual)</button>
+        </div>
+        <p class="sub">Kisi scene par click karke neeche edit kar sakte ho — edit karna optional hai, sab kuch pehle se automatic set hai. ↑ ↓ se order badlo.</p>
+        <div class="grid" id="sceneList" style="gap:10px"></div>
+        <div class="empty hidden" id="sceneEmpty">Abhi koi scene nahi hai. Upar script daal ke <b>“Script se Video Banao”</b> dabao — scenes apne aap ban jayenge.</div>
+      </div>
+
+      <div class="card hidden" id="editorCard">
+        <h2>Scene Edit Karo <span class="small">(optional)</span></h2>
+        <p class="sub">Jo cheez tum haath se badloge, us par <span class="pill pill-auto">Auto</span> ki jagah <span class="pill pill-manual">Manual</span> badge aa jayega.</p>
+        <div id="editorBody"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LIBRARY VIEW ============ -->
+  <section id="viewLib" class="hidden">
+    <div class="card mt" style="margin-top:22px">
+      <h2>Characters — Locked Look (39 Characters)</h2>
+      <p class="sub">Doctor se lekar Fire Fighter tak sab hain — Doctor, Doctor Didi, Nurse, Police (Sipahi, Inspector, Mahila Police), Chor, Fire Fighter, Fauji, Pilot, Chef, Dakiya, Engineer, Scientist, Judge, Vakil, Neta, Rani, Student, Superhero, Safai Karmi, Bijli Wala, Painter, Delivery Boy, Guard, Driver, Pandit Ji, aur purane Aman, Priya, Dadi, Kisan, Dukandar, Maa, Master Ji, Raja, Bandar, Magarmachh. Har character ka look fixed hai — script me jab bhi uska naam aayega, wahi chehra, wahi vardi / kapde, wahi awaaz milegi.</p>
+      <div class="libgrid" id="charLib"></div>
+    </div>
+
+    <div class="card mt">
+      <h2>Apna Character Jodo</h2>
+      <p class="sub">Naam aur pehchan likho, rang chuno, chaaho to photo upload karo. Custom character script me usi naam se auto-use hoga.</p>
+      <label class="flabel" for="ccName">Character ka naam (script me yahi naam likhna)</label>
+      <input class="inp" id="ccName" type="text" placeholder="Jaise: Chintu" maxlength="24">
+      <label class="flabel" for="ccDesc">Pehchan / description</label>
+      <input class="inp" id="ccDesc" type="text" placeholder="Jaise: Laal topi wala shararati ladka" maxlength="80">
+      <div class="two">
+        <div><label class="flabel" for="ccColor">Kapdo ka rang</label><input type="color" id="ccColor" value="#e0245e"></div>
+        <div><label class="flabel" for="ccImg">Reference photo (optional)</label><input type="file" id="ccImg" accept="image/*"></div>
+      </div>
+      <label class="flabel">Awaaz ka type</label>
+      <div class="fmtoggle" id="ccVoice">
+        <button type="button" data-v="male" class="sel">Male — normal pitch</button>
+        <button type="button" data-v="female">Female — unchi pitch</button>
+        <button type="button" data-v="child">Child — sabse unchi</button>
+        <button type="button" data-v="old">Old — gehri, dheemi</button>
+      </div>
+      <div class="btnrow"><button class="btn btn-green" id="btnAddChar" type="button">＋ Character Jodo</button></div>
+      <div class="grid grid3 mt" id="customCharList"></div>
+    </div>
+
+    <div class="card mt">
+      <h2>Backgrounds — Flat 2D Painted Look</h2>
+      <p class="sub">Script ke shabd inhi backgrounds ko auto chunte hain — gaon, ghar, bazaar, school, nadi, jungle, raat, dukaan, khet, sadak, classroom, aspatal (hospital), thana, kachehri (court).</p>
+      <div class="libgrid" id="bgLib"></div>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* ================= DATA ================= */
+var CHARACTERS = [
+ {id:'aman', name:'Aman', en:'Boy Aman', kind:'human', skin:'#f2c09a', hair:'#1c1c22', hairStyle:'short', shirt:'#2563eb', pants:'#22406b', desc:'Neeli shirt wala ladka', voice:{pitch:1.35, rate:1.05, label:'Boy · unchi, tez'}, keywords:['aman','ladka','boy','bachcha','chhota ladka','beta']},
+ {id:'priya', name:'Priya', en:'Girl Priya', kind:'human', skin:'#f5c6a5', hair:'#14100e', hairStyle:'ponytail', shirt:'#ec4899', pants:'#7e22ce', skirt:true, desc:'Gulabi dress wali ladki', voice:{pitch:1.6, rate:1.0, label:'Girl · female, saaf'}, keywords:['priya','ladki','girl','chhoti ladki','beti','behen']},
+ {id:'raghunath', name:'Raghunath', en:'Old Man Raghunath', kind:'human', skin:'#e6b489', hair:'#e8e8e8', hairStyle:'bald', beard:true, shirt:'#f5e6bd', pants:'#8a6d3b', desc:'Safed dadhi wale buzurg, kurta', voice:{pitch:0.6, rate:0.78, label:'Old man · gehra, dheema'}, keywords:['raghunath','buddha','baba','dada ji','dadaji','buzurg','old man','sarpanch']},
+ {id:'dadi', name:'Dadi Amma', en:'Grandmother', kind:'human', skin:'#eec39b', hair:'#d9d9d9', hairStyle:'bun', glasses:true, shirt:'#7c3aed', pants:'#4c1d95', sari:true, desc:'Chashme wali dadi, baingani sari', voice:{pitch:1.1, rate:0.82, label:'Grandmother · naram, dheemi'}, keywords:['dadi','nani','amma','grandmother','budhiya']},
+ {id:'kisan', name:'Kisan Ramu', en:'Farmer', kind:'human', skin:'#d99e67', hair:'#222', hairStyle:'turban', mustache:true, shirt:'#4d9b47', pants:'#6b4f2a', desc:'Pagdi wala kisan, haryali shirt', voice:{pitch:0.9, rate:0.9, label:'Farmer · normal, thahra hua'}, keywords:['kisan','farmer','ramu','khet wala','hal']},
+ {id:'dukandar', name:'Dukandar Seth', en:'Shopkeeper', kind:'human', skin:'#edb98a', hair:'#2a2a2a', hairStyle:'cap', mustache:true, shirt:'#b45309', pants:'#374151', vest:true, desc:'Topi aur badi moonchh wala seth ji', voice:{pitch:1.0, rate:0.95, label:'Shopkeeper · normal'}, keywords:['dukandar','seth','shopkeeper','dukan wala','vyapari']},
+ {id:'maa', name:'Maa', en:'Mother', kind:'human', skin:'#f0bd93', hair:'#191410', hairStyle:'bun', shirt:'#0e7490', pants:'#155e75', sari:true, desc:'Neeli sari wali maa', voice:{pitch:1.45, rate:0.95, label:'Mother · female, pyaari'}, keywords:['maa','mother','mummy','mata','mammi']},
+ {id:'teacher', name:'Master Ji', en:'Teacher', kind:'human', skin:'#e9b98d', hair:'#333', hairStyle:'short', glasses:true, shirt:'#f8fafc', pants:'#334155', desc:'Chashme wale teacher, safed shirt', voice:{pitch:0.95, rate:0.88, label:'Teacher · saaf, dheema'}, keywords:['teacher','master','guru','adhyapak','sir','madam']},
+ {id:'bandar', name:'Bandar', en:'Monkey', kind:'monkey', desc:'Chalak bandar — bhoora, lambi punchh', voice:{pitch:1.8, rate:1.2, label:'Monkey · sabse unchi, shararati'}, keywords:['bandar','monkey','vanar','hanuman']},
+ {id:'magarmachh', name:'Magarmachh', en:'Crocodile', kind:'croc', desc:'Hara magarmachh — lamba munh, bade daant', voice:{pitch:0.5, rate:0.72, label:'Crocodile · sabse gehra, bhaari'}, keywords:['magarmachh','magar','crocodile','ghadial']},
+ {id:'raja', name:'Raja Sahab', en:'King', kind:'human', skin:'#eec39b', hair:'#111', hairStyle:'crown', mustache:true, shirt:'#b91c1c', pants:'#7f1d1d', desc:'Mukut wala raja, laal poshak', voice:{pitch:0.8, rate:0.85, label:'King · bhaari, shandaar'}, keywords:['raja','king','maharaj','samrat']},
+ {id:'sipahi', name:'Sipahi', en:'Policeman', kind:'human', skin:'#d99e67', hair:'#111', hairStyle:'policecap', mustache:true, shirt:'#1d4ed8', pants:'#1e3a8a', desc:'Neeli vardi wala sipahi', voice:{pitch:0.95, rate:1.0, label:'Policeman · kadak, saaf'}, keywords:['sipahi','police','kotwal','havaldar']},
+ {id:'doctor', name:'Doctor Sahab', en:'Doctor', kind:'human', skin:'#f2c09a', hair:'#1c1c22', hairStyle:'short', glasses:true, shirt:'#0e7490', pants:'#1f2937', coat:true, tool:'stethoscope', desc:'Safed coat, gale me stethoscope wala doctor', voice:{pitch:0.95, rate:0.9, label:'Doctor · shaant, saaf'}, keywords:['doctor sahab','doctor','daaktar','daktar','vaidya','chikitsak','tabib']},
+ {id:'doctordidi', name:'Doctor Didi', en:'Lady Doctor', kind:'human', skin:'#f5c6a5', hair:'#14100e', hairStyle:'ponytail', shirt:'#0e7490', pants:'#1f2937', coat:true, tool:'stethoscope', desc:'Safed coat wali mahila doctor', voice:{pitch:1.5, rate:0.95, label:'Lady Doctor · female, shaant'}, keywords:['doctor didi','lady doctor','mahila doctor','doctor madam']},
+ {id:'nurse', name:'Nurse Didi', en:'Nurse', kind:'human', skin:'#f5c6a5', hair:'#14100e', hairStyle:'nurse', shirt:'#f8fafc', pants:'#be123c', skirt:true, desc:'Safed dress, laal cross topi wali nurse', voice:{pitch:1.55, rate:1.0, label:'Nurse · female, pyaari'}, keywords:['nurse didi','nurse','paricharika']},
+ {id:'inspector', name:'Inspector Sahab', en:'Police Inspector', kind:'human', skin:'#d99e67', hair:'#111', hairStyle:'policecap', mustache:true, shirt:'#b49a55', pants:'#6b5320', badge:true, desc:'Khaki vardi, sitaara badge wala inspector', voice:{pitch:0.82, rate:0.95, label:'Inspector · kadak, bhaari'}, keywords:['inspector sahab','inspector','daroga','thanedar','police inspector','police wala','pulis wala']},
+ {id:'policewoman', name:'Mahila Police', en:'Policewoman', kind:'human', skin:'#edb98a', hair:'#14100e', hairStyle:'policewoman', shirt:'#b49a55', pants:'#6b5320', badge:true, desc:'Khaki vardi wali mahila police', voice:{pitch:1.4, rate:1.0, label:'Policewoman · female, kadak'}, keywords:['mahila police','policewoman','lady police','mahila sipahi']},
+ {id:'chor', name:'Chor', en:'Thief', kind:'human', skin:'#e6b489', hair:'#111', hairStyle:'beanie', eyeMask:true, shirt:'#f1f5f9', pants:'#111827', stripes:true, tool:'bag', desc:'Aankhon par kaala mask, dhaari-daar shirt wala chor', voice:{pitch:0.92, rate:1.12, label:'Chor · dabki, tez fussy'}, keywords:['chor','thief','chori','lutera','dakoo','dacoit','girahkat']},
+ {id:'firefighter', name:'Fire Fighter', en:'Firefighter', kind:'human', skin:'#d99e67', hair:'#111', hairStyle:'firehelmet', shirt:'#ea580c', pants:'#7c2d12', reflective:true, desc:'Laal helmet, narangi jacket wala aag bujhane wala', voice:{pitch:1.0, rate:1.06, label:'Fire Fighter · tez, himmat wala'}, keywords:['fire fighter','firefighter','fireman','damkal','agnishamak','aag wala','aag bujhane wala']},
+ {id:'soldier', name:'Fauji Bhaiya', en:'Soldier', kind:'human', skin:'#d99e67', hair:'#111', hairStyle:'armycap', shirt:'#4d7c0f', pants:'#365314', camo:true, desc:'Hari camouflage vardi wala fauji', voice:{pitch:0.88, rate:0.98, label:'Soldier · kadak, josh'}, keywords:['fauji bhaiya','fauji','sainik','soldier','army','jawan','sena wala']},
+ {id:'pilot', name:'Pilot', en:'Pilot', kind:'human', skin:'#f0bd93', hair:'#111', hairStyle:'pilotcap', sunglasses:true, shirt:'#1e3a8a', pants:'#1e293b', badge:true, desc:'Neeli vardi, pilot topi aur kaala chashma wala pilot', voice:{pitch:0.95, rate:0.95, label:'Pilot · shaant, confident'}, keywords:['pilot','captain','jahaz wala','hawai jahaz wala','vimanchalak']},
+ {id:'chef', name:'Bawarchi Chef', en:'Chef', kind:'human', skin:'#edb98a', hair:'#222', hairStyle:'chefhat', mustache:true, shirt:'#f8fafc', pants:'#374151', desc:'Unchi safed topi wala bawarchi / chef', voice:{pitch:1.02, rate:0.98, label:'Chef · khush, tez'}, keywords:['bawarchi','chef','cook','khansama','rasoiya','halwai','khana banane wala']},
+ {id:'postman', name:'Dakiya Chacha', en:'Postman', kind:'human', skin:'#e6b489', hair:'#222', hairStyle:'cap', shirt:'#b49a55', pants:'#6b5320', tool:'bag', desc:'Khaki vardi, kandhe par thaila wala dakiya', voice:{pitch:0.95, rate:0.92, label:'Postman · normal, thahra'}, keywords:['dakiya','postman','chitthi wala','dak wala','dakiya chacha']},
+ {id:'engineer', name:'Engineer', en:'Engineer', kind:'human', skin:'#f2c09a', hair:'#222', hairStyle:'hardhat', shirt:'#2563eb', pants:'#334155', vest:true, vestColor:'#ea580c', desc:'Peela helmet, narangi jacket wala engineer', voice:{pitch:0.98, rate:0.95, label:'Engineer · saaf, samajhdar'}, keywords:['engineer','abhiyanta','site wala']},
+ {id:'scientist', name:'Scientist', en:'Scientist', kind:'human', skin:'#f5c6a5', hair:'#d9d9d9', hairStyle:'wild', glasses:true, shirt:'#0e7490', pants:'#334155', coat:true, desc:'Safed coat, bikhre safed baal wala vaigyanik', voice:{pitch:1.02, rate:0.9, label:'Scientist · dheema, soch wala'}, keywords:['scientist','vaigyanik','vigyan wala','professor','shodhkarta']},
+ {id:'judge', name:'Judge Sahab', en:'Judge', kind:'human', skin:'#eec39b', hair:'#d9d9d9', hairStyle:'judgewig', glasses:true, shirt:'#111827', pants:'#111827', desc:'Kaala coat, safed wig wale judge sahab', voice:{pitch:0.68, rate:0.76, label:'Judge · gambheer, gehra'}, keywords:['judge sahab','judge','nyayadhish','jaj sahab','nyayadhish ji']},
+ {id:'vakil', name:'Vakil Sahab', en:'Lawyer', kind:'human', skin:'#e9b98d', hair:'#111', hairStyle:'short', shirt:'#1f2937', pants:'#111827', desc:'Kaale coat, safed shirt wala vakil', voice:{pitch:0.9, rate:1.0, label:'Lawyer · tez, dalil wala'}, keywords:['vakil sahab','vakil','lawyer','adhivakta','barrister']},
+ {id:'neta', name:'Neta Ji', en:'Leader Politician', kind:'human', skin:'#edb98a', hair:'#333', hairStyle:'netacap', shirt:'#f8fafc', pants:'#d6d3cd', vest:true, desc:'Safed kurta, Gandhi topi wale neta ji', voice:{pitch:0.92, rate:0.9, label:'Neta · bhashan wala, josh'}, keywords:['neta ji','neta','mantri','politician','vidhayak','sansad','leader','pradhan']},
+ {id:'rani', name:'Rani Sahiba', en:'Queen', kind:'human', skin:'#f5c6a5', hair:'#14100e', hairStyle:'crown', shirt:'#be123c', pants:'#881337', sari:true, desc:'Mukut wali rani, gehri laal sari', voice:{pitch:1.42, rate:0.9, label:'Queen · female, shandaar'}, keywords:['rani sahiba','rani','queen','maharani']},
+ {id:'studentboy', name:'Student Ladka', en:'School Boy Student', kind:'human', skin:'#f2c09a', hair:'#111', hairStyle:'short', shirt:'#f8fafc', pants:'#2563eb', tool:'bag', desc:'Safed shirt, neela pant, peeth par basta wala student', voice:{pitch:1.42, rate:1.06, label:'Student Boy · uncha, tez'}, keywords:['student ladka','chhatra','student','vidyarthi','school ladka','padhaku ladka']},
+ {id:'studentgirl', name:'Student Ladki', en:'School Girl Student', kind:'human', skin:'#f5c6a5', hair:'#14100e', hairStyle:'ponytail', shirt:'#f8fafc', pants:'#2563eb', skirt:true, tool:'bag', desc:'Safed shirt, neeli skirt wali student ladki', voice:{pitch:1.62, rate:1.02, label:'Student Girl · female, tez'}, keywords:['student ladki','chhatra ladki','vidyarthini','school ladki']},
+ {id:'superhero', name:'Superhero', en:'Superhero', kind:'human', skin:'#f2c09a', hair:'#111', hairStyle:'short', eyeMask:true, cape:true, shirt:'#2563eb', pants:'#dc2626', desc:'Laal cape, neela suit, aankhon par mask wala superhero', voice:{pitch:1.0, rate:1.02, label:'Superhero · josh, himmat'}, keywords:['superhero','super hero','shaktiman','udne wala hero']},
+ {id:'safaiwala', name:'Safai Karmi', en:'Cleaner', kind:'human', skin:'#d99e67', hair:'#222', hairStyle:'cap', shirt:'#0e7490', pants:'#134e4a', desc:'Neeli vardi wala safai karmi, haath me jhaadu', voice:{pitch:0.95, rate:0.95, label:'Cleaner · normal'}, keywords:['safai karmi','safaiwala','safai wala','cleaner','kachra wala','jamadar']},
+ {id:'bijliwala', name:'Bijli Wala', en:'Electrician', kind:'human', skin:'#e6b489', hair:'#222', hairStyle:'hardhat', shirt:'#ca8a04', pants:'#374151', desc:'Peela helmet, peeli shirt wala bijli mistri', voice:{pitch:0.97, rate:0.97, label:'Electrician · normal, tez'}, keywords:['bijli wala','electrician','bijli mistri','lineman','bijli wala bhaiya']},
+ {id:'painter', name:'Painter Rang Wala', en:'Painter', kind:'human', skin:'#edb98a', hair:'#222', hairStyle:'cap', shirt:'#f97316', pants:'#f1f5f9', desc:'Narangi shirt, rang ke dabbe wala painter', voice:{pitch:1.0, rate:0.97, label:'Painter · normal, khush'}, keywords:['painter','rang wala','paint wala','rangai wala']},
+ {id:'delivery', name:'Delivery Boy', en:'Delivery Boy', kind:'human', skin:'#f2c09a', hair:'#111', hairStyle:'cap', shirt:'#16a34a', pants:'#1f2937', tool:'bag', desc:'Hari shirt, peeth par bada dabba-bag wala delivery boy', voice:{pitch:1.2, rate:1.08, label:'Delivery Boy · tez, young'}, keywords:['delivery boy','delivery','delivery wala','khana lane wala']},
+ {id:'guard', name:'Chowkidar Guard', en:'Guard Watchman', kind:'human', skin:'#d99e67', hair:'#111', hairStyle:'cap', mustache:true, shirt:'#374151', pants:'#111827', desc:'Gehri vardi, badi moonchh wala chowkidar', voice:{pitch:0.85, rate:0.9, label:'Guard · kadak, dheema'}, keywords:['chowkidar','guard','watchman','rakhwala','pehredaar','guard sahab']},
+ {id:'driver', name:'Driver Auto Wala', en:'Driver', kind:'human', skin:'#d99e67', hair:'#222', hairStyle:'short', shirt:'#65a30d', pants:'#374151', desc:'Hari shirt wala auto / gaadi driver', voice:{pitch:1.0, rate:1.02, label:'Driver · normal, tez'}, keywords:['driver','auto wala','gaadi wala','riksha wala','chalane wala']},
+ {id:'pandit', name:'Pandit Ji', en:'Priest', kind:'human', skin:'#f0bd93', hair:'#d9d9d9', hairStyle:'bald', shirt:'#f97316', pants:'#fef3c7', desc:'Kesariya kurta, maathe par tilak wale pandit ji', voice:{pitch:0.88, rate:0.84, label:'Priest · shaant, dheema'}, keywords:['pandit ji','pandit','purohit','priest','pooja wala']}
+];
+var NARRATOR_VOICE = {pitch:0.7, rate:0.86, label:'Narrator · gehra, dheema (sabse alag)'};
+var BACKGROUNDS = [
+ {id:'village', name:'Gaon (Village)', keys:['gaon','gaaon','village','basti']},
+ {id:'house', name:'Ghar (House)', keys:['ghar','house','kamra','kamre','aangan','andar']},
+ {id:'market', name:'Bazaar (Market)', keys:['bazaar','bazar','market','mela','haat']},
+ {id:'school', name:'School', keys:['school','vidyalaya','pathshala','padhai']},
+ {id:'classroom', name:'Classroom', keys:['classroom','kaksha','class me','blackboard']},
+ {id:'hospital', name:'Aspatal (Hospital)', keys:['aspatal','hospital','dawai','ilaaj','ilaj','bimar','mareez','patient','clinic']},
+ {id:'thana', name:'Thana (Police Station)', keys:['thana','police station','jail','jel','kaid','kaidi','hawalat']},
+ {id:'court', name:'Kachehri (Court)', keys:['court','adalat','adalaat','kachehri','kachahri','mukadma','case chala']},
+ {id:'river', name:'Nadi (River)', keys:['nadi','river','kinara','kinare','paani','pani','talaab',' talab','jheel']},
+ {id:'forest', name:'Jungle (Forest)', keys:['jungle','forest','van','ped','pedh','darakht','jhaadi']},
+ {id:'night', name:'Raat (Night)', keys:['raat','night','andhera','andheri','chaand','chand','sone ka samay','so gaya','so gayi']},
+ {id:'shop', name:'Dukaan (Shop)', keys:['dukaan','dukan','shop','mithaas','mithai']},
+ {id:'field', name:'Khet (Field/Farm)', keys:['khet','field','fasal','kisani','kheti','gehun','sarson']},
+ {id:'road', name:'Sadak (Road)', keys:['sadak','road','rasta','raasta','safar','yatra','chalte hue']},
+ {id:'pond', name:'Nadi Kinara (Bank)', keys:['ghaat','pul','bridge']}
+];
+var ANIMS = [
+ {id:'talk', name:'Talk — Bolna', keys:['bola','boli','kaha','kehta','kehti','bol','baat','puchha','pucha','jawab','chillaya','hans','hansa']},
+ {id:'walk', name:'Walk — Chalna', keys:['chal','chala','chali','gaya','gayi','aaya','aayi','daud','bhaag','nikla','pohcha','pahuncha','lauta','walk','ja raha','aa raha','ja rahi']},
+ {id:'sleep', name:'Sleep — Sona', keys:['so gaya','so gayi','soya','soyi','neend','sleep','leta','leti']},
+ {id:'sit', name:'Sit — Baithna', keys:['baith','baitha','baithi','sit','kursi']},
+ {id:'wave', name:'Wave — Haath Hilana / Khush', keys:['khush','wave','namaste','vida','alvida','swagat','haath hilaya','muskuraya','muskurayi']},
+ {id:'idle', name:'Idle — Khada Rehna', keys:[]}
+];
+var SAMPLE_SCRIPT = [
+"Narrator: Ek chhote se gaon ke paas ek badi nadi behti thi. Nadi ke kinare ek bada aam ka ped tha.",
+"Bandar: Main is ped par rehta hoon. Neeche nadi me mera dost Magarmachh rehta hai.",
+"Magarmachh: Bandar bhai! Aaj ped se meethe aam tod kar khilao na, bahut bhookh lagi hai.",
+"Bandar: Zarur dost! Ye lo meethe aam. Tum roj nadi se meri baatein sunne aate ho.",
+"Narrator: Ek din Bandar khet ki taraf chalte hue bazaar gaya aur wahan se gulaab jaamun laaya.",
+"Bandar: Magarmachh, aaj main tumhare liye meri biwi ke haath ke jaamun laaya hoon.",
+"Magarmachh: Wah! Meri biwi ko bhi ye bahut pasand aayenge. Kal tum meri peeth par baith kar mere ghar chalo.",
+"Narrator: Agle din Bandar magarmachh ki peeth par baith kar nadi ke beech tak gaya.",
+"Magarmachh: Sach bataun dost, meri biwi tumhara dil khaana chahti hai. Isiliye bulaya tha.",
+"Bandar: Are dost! Main to apna dil ped par hi rakh aaya hoon. Chalo wapas, ped se laakar de deta hoon.",
+"Narrator: Kinare aate hi Bandar ped par chadh gaya aur bola — jo dost ko dhokha de, wo dost nahi hota. Aur us din se chalak bandar akela khush rehne laga."
+].join("\n");
+
+function charById(id){ for(var i=0;i<CHARACTERS.length;i++) if(CHARACTERS[i].id===id) return CHARACTERS[i]; return null; }
+function bgById(id){ for(var i=0;i<BACKGROUNDS.length;i++) if(BACKGROUNDS[i].id===id) return BACKGROUNDS[i]; return BACKGROUNDS[0]; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function uid(){ return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},3400); }
+</script>
+<script>
+"use strict";
+/* ================= STATE + STORAGE ================= */
+var LS_KEY='cartoonStudioProjectsV1';
+var projects=[]; var current=null; var selSceneId=null; var npFormat='16:9';
+try{ var raw=localStorage.getItem(LS_KEY); if(raw) projects=JSON.parse(raw)||[]; }catch(e){ projects=[]; }
+function saveAll(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(projects)); }catch(e){} var s=document.getElementById('projSaved'); if(s){ s.textContent='✓ Saved'; } }
+function saveSoon(){ var s=document.getElementById('projSaved'); if(s) s.textContent='Saving…'; saveAll(); }
+function getProject(id){ for(var i=0;i<projects.length;i++) if(projects[i].id===id) return projects[i]; return null; }
+function newProjectObj(name, fmt){
+  return { id:uid(), name:name||'Bina Naam Project', format:fmt||'16:9', created:Date.now(), updated:Date.now(),
+    script:'', scenes:[], locks:{}, customChars:[] };
+}
+function touch(){ if(current){ current.updated=Date.now(); saveSoon(); } }
+
+/* ================= VIEW SWITCH ================= */
+function showView(v){
+  document.getElementById('viewDash').classList.toggle('hidden', v!=='dash');
+  document.getElementById('viewStudio').classList.toggle('hidden', v!=='studio');
+  document.getElementById('viewLib').classList.toggle('hidden', v!=='lib');
+  document.getElementById('navDash').classList.toggle('active', v==='dash');
+  document.getElementById('navStudio').classList.toggle('active', v==='studio');
+  document.getElementById('navLib').classList.toggle('active', v==='lib');
+  if(v==='lib') renderLibrary();
+  if(v==='dash') renderProjects();
+  window.scrollTo(0,0);
+}
+document.getElementById('navDash').addEventListener('click', function(){ showView('dash'); });
+document.getElementById('navStudio').addEventListener('click', function(){ if(!current){ toast('Pehle Dashboard se ek project banao ya kholo'); showView('dash'); return; } showView('studio'); });
+document.getElementById('navLib').addEventListener('click', function(){ showView('lib'); });
+document.getElementById('btnBack').addEventListener('click', function(){ stopPlayback(); showView('dash'); });
+
+/* ================= DASHBOARD ================= */
+document.getElementById('npFmt').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return; npFormat=b.getAttribute('data-fmt');
+  var bs=this.querySelectorAll('button'); for(var i=0;i<bs.length;i++) bs[i].classList.toggle('sel', bs[i]===b);
+});
+function createProject(name, fmt){
+  var p=newProjectObj(name, fmt); projects.unshift(p); saveAll(); openProject(p.id); return p;
+}
+document.getElementById('btnCreate').addEventListener('click', function(){
+  var name=document.getElementById('npName').value.trim()||'Meri Kahani';
+  createProject(name, npFormat); toast('Project ban gaya — ab script daal ke bada green button dabao');
+});
+document.getElementById('btnSampleDash').addEventListener('click', function(){
+  var p=createProject('Chalak Bandar aur Lalchi Magarmachh', '16:9');
+  document.getElementById('scriptInput').value=SAMPLE_SCRIPT; p.script=SAMPLE_SCRIPT;
+  runAutoPipeline(true);
+});
+function renderProjects(){
+  var list=document.getElementById('projList'); var empty=document.getElementById('projEmpty');
+  empty.classList.toggle('hidden', projects.length>0); list.innerHTML='';
+  projects.forEach(function(p){
+    var d=document.createElement('div'); d.className='card proj-card'; d.style.boxShadow='none';
+    var dt=new Date(p.updated);
+    d.innerHTML='<div style="font-weight:700;font-size:17px">'+esc(p.name)+'</div>'+
+      '<div class="meta"><span class="pill pill-fmt">'+esc(p.format)+'</span> &nbsp;'+p.scenes.length+' scenes · '+(p.locks?Object.keys(p.locks).length:0)+' characters locked</div>'+
+      '<div class="meta">Last update: '+dt.toLocaleDateString('en-IN')+' '+dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+'</div>'+
+      '<div class="actions"><button class="btn btn-green btn-sm" data-act="open">Studio Kholo</button>'+
+      '<button class="btn btn-ghost btn-sm" data-act="dup">Copy</button>'+
+      '<button class="btn btn-ghost btn-sm" data-act="del">Delete</button></div>';
+    d.querySelector('[data-act="open"]').addEventListener('click', function(){ openProject(p.id); });
+    d.querySelector('[data-act="dup"]').addEventListener('click', function(){ var c=JSON.parse(JSON.stringify(p)); c.id=uid(); c.name=p.name+' (copy)'; c.updated=Date.now(); projects.unshift(c); saveAll(); renderProjects(); toast('Project copy ho gaya'); });
+    d.querySelector('[data-act="del"]').addEventListener('click', function(){ if(current&&current.id===p.id){ stopPlayback(); current=null; } projects=projects.filter(function(x){return x.id!==p.id;}); saveAll(); renderProjects(); toast('Project delete ho gaya'); });
+    list.appendChild(d);
+  });
+}
+
+/* ================= OPEN PROJECT / STUDIO ================= */
+function openProject(id){
+  current=getProject(id); if(!current) return;
+  if(!current.locks) current.locks={}; if(!current.customChars) current.customChars=[];
+  selSceneId=current.scenes.length?current.scenes[0].id:null;
+  document.getElementById('projName').value=current.name;
+  document.getElementById('projFmt').textContent=current.format+(current.format==='16:9'?' · Landscape':' · Portrait');
+  document.getElementById('scriptInput').value=current.script||'';
+  var wrap=document.getElementById('canvasWrap'); var cv=document.getElementById('stage');
+  if(current.format==='9:16'){ wrap.className='canvaswrap r916'; cv.width=720; cv.height=1280; }
+  else { wrap.className='canvaswrap r169'; cv.width=1280; cv.height=720; }
+  resetSteps(); renderScenes(); updateProgUI();
+  if(window.__customCharsSync) window.__customCharsSync();
+  showView('studio');
+  drawCurrentStill();
+}
+document.getElementById('projName').addEventListener('input', function(){ if(!current) return; current.name=this.value; touch(); });
+document.getElementById('scriptInput').addEventListener('input', function(){ if(!current) return; current.script=this.value; touch(); });
+document.getElementById('btnSample').addEventListener('click', function(){ document.getElementById('scriptInput').value=SAMPLE_SCRIPT; if(current){ current.script=SAMPLE_SCRIPT; touch(); } toast('Sample script load ho gaya — ab bada green button dabao'); });
+document.getElementById('btnClearScript').addEventListener('click', function(){ document.getElementById('scriptInput').value=''; if(current){ current.script=''; touch(); } });
+</script>
+<script>
+"use strict";
+/* ================= BACKGROUND DRAWING (flat 2D) ================= */
+function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function drawTree(ctx,x,groundY,s,leaf,trunk){
+  ctx.fillStyle=trunk||'#7a4a21'; rr(ctx,x-7*s,groundY-70*s,14*s,70*s,6*s); ctx.fill();
+  ctx.fillStyle=leaf||'#2e8b3a';
+  [[0,-120,52],[ -38,-92,38],[38,-92,38]].forEach(function(c){ ctx.beginPath(); ctx.arc(x+c[0]*s,groundY+c[1]*s,c[2]*s,0,7); ctx.fill(); });
+}
+function drawHouseShape(ctx,x,groundY,w,h,wall,roof){
+  ctx.fillStyle=wall; rr(ctx,x,groundY-h,w,h,4); ctx.fill();
+  ctx.fillStyle=roof; ctx.beginPath(); ctx.moveTo(x-w*0.12,groundY-h); ctx.lineTo(x+w/2,groundY-h-h*0.55); ctx.lineTo(x+w*1.12,groundY-h); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#6b4423'; rr(ctx,x+w*0.38,groundY-h*0.52,w*0.24,h*0.52,4); ctx.fill();
+  ctx.fillStyle='#bfe8ff'; rr(ctx,x+w*0.08,groundY-h*0.78,w*0.2,h*0.24,3); ctx.fill(); rr(ctx,x+w*0.72,groundY-h*0.78,w*0.2,h*0.24,3); ctx.fill();
+}
+function drawBackground(ctx,W,H,bgId,t){
+  var gy=H*0.78; /* ground line */
+  ctx.clearRect(0,0,W,H);
+  if(bgId==='night'){
+    ctx.fillStyle='#101c3a'; ctx.fillRect(0,0,W,gy);
+    ctx.fillStyle='#f7e8a0'; ctx.beginPath(); ctx.arc(W*0.82,H*0.16,H*0.055,0,7); ctx.fill();
+    ctx.fillStyle='#101c3a'; ctx.beginPath(); ctx.arc(W*0.85,H*0.14,H*0.05,0,7); ctx.fill();
+    ctx.fillStyle='#fff';
+    for(var i=0;i<40;i++){ var sx=(i*97.3)%W, sy=(i*57.7)%(H*0.4); ctx.globalAlpha=0.5+0.5*Math.sin(t/600+i); ctx.fillRect(sx,sy,3,3); }
+    ctx.globalAlpha=1;
+    ctx.fillStyle='#0d2b1a'; ctx.fillRect(0,gy,W,H-gy);
+    drawHouseShape(ctx,W*0.06,gy,W*0.2,H*0.24,'#3a4666','#232c47');
+    drawHouseShape(ctx,W*0.72,gy,W*0.18,H*0.2,'#3a4666','#232c47');
+    ctx.fillStyle='#ffd76a'; rr(ctx,W*0.115,gy-H*0.15,W*0.03,H*0.045,2); ctx.fill();
+    drawTree(ctx,W*0.45,gy,H/620,'#123524','#241a10'); drawTree(ctx,W*0.6,gy,H/760,'#123524','#241a10');
+    return;
+  }
+  if(bgId==='hospital'){
+    ctx.fillStyle='#e8f6fb'; ctx.fillRect(0,0,W,gy);
+    ctx.fillStyle='#cbd5e1'; ctx.fillRect(0,gy,W,H-gy);
+    ctx.fillStyle='#fff'; rr(ctx,W*0.36,H*0.07,W*0.28,H*0.2,10); ctx.fill(); ctx.strokeStyle='#94a3b8'; ctx.lineWidth=4; rr(ctx,W*0.36,H*0.07,W*0.28,H*0.2,10); ctx.stroke(); ctx.lineWidth=1;
+    ctx.fillStyle='#dc2626'; ctx.fillRect(W*0.485,H*0.095,W*0.03,H*0.15); ctx.fillRect(W*0.425,H*0.135,W*0.15,H*0.055);
+    ctx.fillStyle='#8ecdf0'; rr(ctx,W*0.06,H*0.12,W*0.18,H*0.28,8); ctx.fill(); rr(ctx,W*0.76,H*0.12,W*0.18,H*0.28,8); ctx.fill();
+    ctx.fillStyle='#f8fafc'; rr(ctx,W*0.06,gy-H*0.14,W*0.3,H*0.1,6); ctx.fill(); ctx.fillStyle='#38bdf8'; rr(ctx,W*0.06,gy-H*0.14,W*0.3,H*0.045,6); ctx.fill();
+    ctx.fillStyle='#f8fafc'; rr(ctx,W*0.64,gy-H*0.14,W*0.3,H*0.1,6); ctx.fill(); ctx.fillStyle='#38bdf8'; rr(ctx,W*0.64,gy-H*0.14,W*0.3,H*0.045,6); ctx.fill();
+    ctx.fillStyle='#64748b'; [0.1,0.32,0.68,0.9].forEach(function(f){ ctx.fillRect(W*f,gy-H*0.04,5,H*0.04); });
+    ctx.fillStyle='#0f766e'; ctx.font='700 '+Math.round(H*0.04)+'px Hind, sans-serif'; ctx.textAlign='center'; ctx.fillText('ASPATAL', W*0.5, H*0.36); ctx.textAlign='left';
+    return;
+  }
+  if(bgId==='house'||bgId==='classroom'){
+    ctx.fillStyle= bgId==='house' ? '#fdeec9' : '#f3ead8'; ctx.fillRect(0,0,W,gy);
+    ctx.fillStyle='#b5793e'; ctx.fillRect(0,gy,W,H-gy);
+    ctx.strokeStyle='rgba(0,0,0,.12)'; for(var x=0;x<W;x+=W/9){ ctx.beginPath(); ctx.moveTo(x,gy); ctx.lineTo(x-W*0.03,H); ctx.stroke(); }
+    if(bgId==='classroom'){
+      ctx.fillStyle='#1f5c3d'; rr(ctx,W*0.22,H*0.1,W*0.56,H*0.42,10); ctx.fill();
+      ctx.strokeStyle='#8a5a2b'; ctx.lineWidth=10; rr(ctx,W*0.22,H*0.1,W*0.56,H*0.42,10); ctx.stroke(); ctx.lineWidth=1;
+      ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=4;
+      [0.2,0.3,0.4].forEach(function(f,i){ ctx.beginPath(); ctx.moveTo(W*0.28,H*f+ H*0.02); ctx.lineTo(W*(0.5+ (i%2)*0.12),H*f+H*0.02); ctx.stroke(); });
+      ctx.lineWidth=1;
+      ctx.fillStyle='#8a5a2b'; rr(ctx,W*0.08,gy-14,W*0.2,16,4); ctx.fill(); rr(ctx,W*0.72,gy-14,W*0.2,16,4); ctx.fill();
+    } else {
+      ctx.fillStyle='#8ecdf0'; rr(ctx,W*0.08,H*0.12,W*0.2,H*0.3,8); ctx.fill(); ctx.strokeStyle='#8a5a2b'; ctx.lineWidth=8; rr(ctx,W*0.08,H*0.12,W*0.2,H*0.3,8); ctx.stroke(); ctx.lineWidth=1;
+      ctx.fillStyle='#a1672f'; rr(ctx,W*0.68,gy-H*0.52,W*0.07,H*0.52,4); ctx.fill();
+      ctx.fillStyle='#e2574c'; ctx.beginPath(); ctx.moveTo(W*0.64,gy-H*0.52); ctx.lineTo(W*0.79,gy-H*0.52); ctx.lineTo(W*0.715,gy-H*0.66); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='#7c4a21'; rr(ctx,W*0.36,gy-10,W*0.28,12,4); ctx.fill();
+      ctx.fillStyle='#d94f3d'; [[0.42],[0.52]].forEach(function(f){ ctx.beginPath(); ctx.arc(W*f[0],gy-H*0.09,H*0.035,0,7); ctx.fill(); });
+    }
+    return;
+  }
+  /* outdoor sky */
+  var sky = bgId==='river'||bgId==='pond' ? '#aee3f7' : (bgId==='field' ? '#bfe8fb' : '#a8dcf5');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,gy);
+  ctx.fillStyle='#ffd94d'; ctx.beginPath(); ctx.arc(W*0.88,H*0.13,H*0.06,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.92)';
+  [[0.14,0.12,1],[0.4,0.08,0.7],[0.62,0.16,0.85]].forEach(function(c){ ctx.beginPath(); ctx.ellipse(W*c[0],H*c[1],W*0.05*c[2],H*0.028*c[2],0,0,7); ctx.ellipse(W*c[0]+W*0.035*c[2],H*c[1]+4,W*0.04*c[2],H*0.022*c[2],0,0,7); ctx.fill(); });
+  if(bgId==='village'){
+    ctx.fillStyle='#79c25f'; ctx.fillRect(0,gy,W,H-gy);
+    ctx.fillStyle='#d9b878'; ctx.beginPath(); ctx.moveTo(W*0.34,H); ctx.lineTo(W*0.47,gy); ctx.lineTo(W*0.6,gy); ctx.lineTo(W*0.72,H); ctx.closePath(); ctx.fill();
+    drawHouseShape(ctx,W*0.05,gy,W*0.19,H*0.26,'#fff3d6','#c1442e');
+    drawHouseShape(ctx,W*0.76,gy,W*0.17,H*0.22,'#ffe1ec','#7c3aed');
+    drawTree(ctx,W*0.3,gy,H/560); drawTree(ctx,W*0.68,gy,H/700);
+    ctx.fillStyle='#3f9d4e'; for(var i2=0;i2<9;i2++){ rr(ctx,(i2*113)%W, gy+((i2*37)%(H-gy-8)), 6, 12, 3); ctx.fill(); }
+  } else if(bgId==='market'||bgId==='shop'){
+    ctx.fillStyle='#e8c98f'; ctx.fillRect(0,gy,W,H-gy);
+    drawHouseShape(ctx,W*0.02,gy,W*0.22,H*0.34,'#f7e3bb','#8a5a2b'); drawHouseShape(ctx,W*0.78,gy,W*0.2,H*0.3,'#f7e3bb','#8a5a2b');
+    var stalls = bgId==='shop' ? [0.3] : [0.26,0.56];
+    stalls.forEach(function(fx,k){
+      var sx=W*fx, sw=W*0.22;
+      ctx.fillStyle='#7c4a21'; rr(ctx,sx,gy-H*0.2,sw,H*0.2,4); ctx.fill();
+      for(var s2=0;s2<6;s2++){ ctx.fillStyle=['#e2574c','#f2a93b','#7ac74f'][s2%3]; ctx.beginPath(); ctx.arc(sx+sw*(0.15+ (s2%3)*0.32), gy-H*0.2+ (s2<3? -8: 14), H*0.028,0,7); ctx.fill(); }
+      ctx.fillStyle= k%2? '#2e8b57':'#d94f3d';
+      ctx.beginPath(); ctx.moveTo(sx-sw*0.06,gy-H*0.24); ctx.lineTo(sx+sw*0.5,gy-H*0.36); ctx.lineTo(sx+sw*1.06,gy-H*0.24); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,.85)'; for(var st=0;st<4;st++){ ctx.beginPath(); ctx.moveTo(sx-sw*0.06+st*sw*0.28, gy-H*0.24 - st*0 + (st%2)*2); ctx.lineTo(sx+sw*0.5, gy-H*0.36); ctx.lineTo(sx+sw*0.5, gy-H*0.36); ctx.fill(); }
+    });
+    ctx.fillStyle='#8a5a2b'; rr(ctx,W*0.36,H*0.06,W*0.28,H*0.09,8); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='700 '+Math.round(H*0.045)+'px Hind, sans-serif'; ctx.textAlign='center';
+    ctx.fillText(bgId==='shop'?'DUKAAN':'BAAZAAR', W*0.5, H*0.125); ctx.textAlign='left';
+  } else if(bgId==='school'){
+    ctx.fillStyle='#8fce6e'; ctx.fillRect(0,gy,W,H-gy);
+    ctx.fillStyle='#fdf6e3'; rr(ctx,W*0.3,gy-H*0.42,W*0.4,H*0.42,6); ctx.fill();
+    ctx.fillStyle='#c1442e'; ctx.beginPath(); ctx.moveTo(W*0.27,gy-H*0.42); ctx.lineTo(W*0.5,gy-H*0.58); ctx.lineTo(W*0.73,gy-H*0.42); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#8ecdf0'; rr(ctx,W*0.36,gy-H*0.34,W*0.09,H*0.12,3); ctx.fill(); rr(ctx,W*0.55,gy-H*0.34,W*0.09,H*0.12,3); ctx.fill();
+    ctx.fillStyle='#6b4423'; rr(ctx,W*0.465,gy-H*0.2,W*0.07,H*0.2,3); ctx.fill();
+    ctx.strokeStyle='#666'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(W*0.5,gy-H*0.58); ctx.lineTo(W*0.5,gy-H*0.7); ctx.stroke(); ctx.lineWidth=1;
+    ctx.fillStyle='#f97316'; rr(ctx,W*0.5,gy-H*0.7,W*0.09,H*0.05,2); ctx.fill(); ctx.fillStyle='#fff'; rr(ctx,W*0.5,gy-H*0.7,W*0.09,H*0.016,2); ctx.fill(); ctx.fillStyle='#2e8b3a'; rr(ctx,W*0.5,gy-H*0.652,W*0.09,H*0.016,2); ctx.fill();
+    drawTree(ctx,W*0.16,gy,H/600); drawTree(ctx,W*0.85,gy,H/640);
+  } else if(bgId==='forest'){
+    ctx.fillStyle='#8fd0a0'; ctx.fillRect(0,0,W,gy);
+    ctx.fillStyle='#2f7a35'; ctx.fillRect(0,gy,W,H-gy);
+    for(var i3=0;i3<7;i3++){ drawTree(ctx, W*(0.06+i3*0.15), gy+((i3%2)*10), H/(430+ (i3%3)*60), '#1e6b2a','#5a3a1a'); }
+    ctx.fillStyle='#256b2e'; for(var b=0;b<10;b++){ ctx.beginPath(); ctx.arc((b*127)%W, gy+H*0.1+((b*29)%(H*0.08)), H*0.03,0,7); ctx.fill(); }
+  } else if(bgId==='river'||bgId==='pond'){
+    ctx.fillStyle='#59b368'; ctx.fillRect(0,gy,W,H*0.07);
+    ctx.fillStyle='#3aa7d6'; ctx.fillRect(0,gy+H*0.07,W,H-gy-H*0.07);
+    ctx.strokeStyle='rgba(255,255,255,.65)'; ctx.lineWidth=3;
+    for(var wv=0;wv<5;wv++){ ctx.beginPath(); for(var px=0;px<=W;px+=26){ var py=gy+H*0.1+wv*H*0.035+Math.sin(px/40+t/500+wv)*4; if(px===0)ctx.moveTo(px,py); else ctx.lineTo(px,py);} ctx.stroke(); }
+    ctx.lineWidth=1;
+    drawTree(ctx,W*0.09,gy,H/520); drawTree(ctx,W*0.88,gy,H/560);
+    ctx.fillStyle='#e8d39a'; ctx.fillRect(0,gy-H*0.012,W,H*0.02);
+  } else if(bgId==='field'){
+    ctx.fillStyle='#7ec850'; ctx.fillRect(0,gy,W,H-gy);
+    ctx.strokeStyle='#5da83c'; ctx.lineWidth=4;
+    for(var r2=0;r2<6;r2++){ ctx.beginPath(); ctx.moveTo(0,gy+ (r2+1)*(H-gy)/6); ctx.bezierCurveTo(W*0.3,gy+(r2+1)*(H-gy)/6-8, W*0.7,gy+(r2+1)*(H-gy)/6+8, W,gy+(r2+1)*(H-gy)/6); ctx.stroke(); }
+    ctx.lineWidth=1;
+    ctx.strokeStyle='#3f8f2a'; ctx.lineWidth=3;
+    for(var c2=0;c2<26;c2++){ var cx=(c2*53)%W, cy=gy+14+((c2*31)%(H-gy-20)); ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx-5,cy-14); ctx.moveTo(cx,cy); ctx.lineTo(cx+5,cy-15); ctx.moveTo(cx,cy); ctx.lineTo(cx,cy-17); ctx.stroke(); }
+    ctx.lineWidth=1; drawHouseShape(ctx,W*0.8,gy,W*0.14,H*0.18,'#fff3d6','#c1442e');
+  } else if(bgId==='thana'){
+    ctx.fillStyle='#d9c48f'; ctx.fillRect(0,gy,W,H-gy);
+    ctx.fillStyle='#fef3c7'; rr(ctx,W*0.24,gy-H*0.44,W*0.52,H*0.44,6); ctx.fill();
+    ctx.fillStyle='#1e3a8a'; rr(ctx,W*0.24,gy-H*0.44,W*0.52,H*0.11,6); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='700 '+Math.round(H*0.05)+'px Hind, sans-serif'; ctx.textAlign='center'; ctx.fillText('POLICE · THANA', W*0.5, gy-H*0.365); ctx.textAlign='left';
+    ctx.fillStyle='#6b4423'; rr(ctx,W*0.45,gy-H*0.22,W*0.1,H*0.22,3); ctx.fill();
+    ctx.fillStyle='#334155'; rr(ctx,W*0.28,gy-H*0.3,W*0.13,H*0.16,3); ctx.fill();
+    ctx.strokeStyle='#111827'; ctx.lineWidth=4; for(var bar=0;bar<4;bar++){ ctx.beginPath(); ctx.moveTo(W*(0.295+bar*0.032),gy-H*0.3); ctx.lineTo(W*(0.295+bar*0.032),gy-H*0.14); ctx.stroke(); } ctx.lineWidth=1;
+    ctx.fillStyle='#334155'; rr(ctx,W*0.59,gy-H*0.3,W*0.13,H*0.16,3); ctx.fill();
+    ctx.strokeStyle='#111827'; ctx.lineWidth=4; for(var bar2=0;bar2<4;bar2++){ ctx.beginPath(); ctx.moveTo(W*(0.605+bar2*0.032),gy-H*0.3); ctx.lineTo(W*(0.605+bar2*0.032),gy-H*0.14); ctx.stroke(); } ctx.lineWidth=1;
+    drawTree(ctx,W*0.12,gy,H/620); drawTree(ctx,W*0.88,gy,H/640);
+  } else if(bgId==='court'){
+    ctx.fillStyle='#cbd5e1'; ctx.fillRect(0,gy,W,H-gy);
+    ctx.fillStyle='#f8fafc'; rr(ctx,W*0.2,gy-H*0.46,W*0.6,H*0.46,4); ctx.fill();
+    ctx.fillStyle='#92400e'; ctx.beginPath(); ctx.moveTo(W*0.16,gy-H*0.46); ctx.lineTo(W*0.5,gy-H*0.6); ctx.lineTo(W*0.84,gy-H*0.46); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#e7e5e4'; [0.28,0.42,0.56,0.68].forEach(function(f){ rr(ctx,W*f,gy-H*0.4,W*0.045,H*0.34,3); ctx.fill(); });
+    ctx.fillStyle='#78350f'; rr(ctx,W*0.2,gy-H*0.08,W*0.6,H*0.08,2); ctx.fill();
+    ctx.fillStyle='#111827'; ctx.font='700 '+Math.round(H*0.042)+'px Hind, sans-serif'; ctx.textAlign='center'; ctx.fillText('KACHEHRI · COURT', W*0.5, gy-H*0.5); ctx.textAlign='left';
+    drawTree(ctx,W*0.08,gy,H/640); drawTree(ctx,W*0.92,gy,H/640);
+  } else if(bgId==='road'){
+    ctx.fillStyle='#79c25f'; ctx.fillRect(0,gy,W,H-gy);
+    ctx.fillStyle='#5b6470'; ctx.beginPath(); ctx.moveTo(W*0.3,H); ctx.lineTo(W*0.46,gy); ctx.lineTo(W*0.56,gy); ctx.lineTo(W*0.74,H); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='#ffd94d'; ctx.lineWidth=5; ctx.setLineDash([22,20]); ctx.beginPath(); ctx.moveTo(W*0.52,H); ctx.lineTo(W*0.51,gy); ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth=1;
+    drawHouseShape(ctx,W*0.04,gy,W*0.16,H*0.2,'#fff3d6','#c1442e'); drawHouseShape(ctx,W*0.82,gy,W*0.14,H*0.17,'#ffe1ec','#7c3aed');
+    drawTree(ctx,W*0.24,gy,H/700); drawTree(ctx,W*0.66,gy,H/720);
+  } else {
+    ctx.fillStyle='#79c25f'; ctx.fillRect(0,gy,W,H-gy);
+    drawHouseShape(ctx,W*0.08,gy,W*0.18,H*0.24,'#fff3d6','#c1442e'); drawTree(ctx,W*0.8,gy,H/560);
+  }
+}
+</script>
+<script>
+"use strict";
+/* ================= CHARACTER DRAWING ================= */
+/* x,y = ground point at feet centre. s = scale (1 => ~230px tall on 720p). flip: face left */
+function drawCharacter(ctx, def, x, y, s, anim, t, talking, flip, customImg){
+  ctx.save(); ctx.translate(x,y); if(flip) ctx.scale(-1,1);
+  if(def.kind==='monkey'){ drawMonkey(ctx,s,anim,t,talking); ctx.restore(); return; }
+  if(def.kind==='croc'){ drawCroc(ctx,s,anim,t,talking); ctx.restore(); return; }
+  if(customImg){ drawCustomChar(ctx,s,anim,t,talking,def,customImg); ctx.restore(); return; }
+  drawHuman(ctx,def,s,anim,t,talking); ctx.restore();
+}
+function mouthOpen(talking,t){ return talking ? (6+Math.abs(Math.sin(t/110))*7) : 0; }
+function drawHuman(ctx,def,s,anim,t,talking){
+  var bob = anim==='idle' ? Math.sin(t/480)*3*s : (anim==='talk' ? Math.sin(t/300)*2*s : 0);
+  var sitDrop = anim==='sit' ? 34*s : 0;
+  var sleeping = anim==='sleep';
+  var legSwing = anim==='walk' ? Math.sin(t/170)*16*s : 0;
+  var hy = -168*s + bob + sitDrop; /* head centre y */
+  /* legs */
+  ctx.strokeStyle=def.pants; ctx.lineWidth=15*s; ctx.lineCap='round';
+  if(anim==='sit'){
+    ctx.beginPath(); ctx.moveTo(-6*s,-52*s+sitDrop); ctx.lineTo(-30*s,-16*s); ctx.moveTo(6*s,-52*s+sitDrop); ctx.lineTo(30*s,-16*s); ctx.stroke();
+  } else if(anim==='sleep'){
+    ctx.beginPath(); ctx.moveTo(-8*s,-54*s); ctx.lineTo(-8*s+legSwing*0.2,-4*s); ctx.moveTo(8*s,-54*s); ctx.lineTo(8*s,-4*s); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(-9*s,-60*s+bob); ctx.lineTo(-9*s+legSwing,-3*s); ctx.moveTo(9*s,-60*s+bob); ctx.lineTo(9*s-legSwing,-3*s); ctx.stroke();
+  }
+  /* shoes */
+  ctx.fillStyle='#33241a';
+  if(anim!=='sit'){ ctx.beginPath(); ctx.ellipse(-9*s+legSwing,-3*s,11*s,6*s,0,0,7); ctx.fill(); ctx.beginPath(); ctx.ellipse(9*s-legSwing,-3*s,11*s,6*s,0,0,7); ctx.fill(); }
+  /* cape (superhero) — body ke peeche */
+  if(def.cape){ ctx.fillStyle='#dc2626'; ctx.beginPath(); ctx.moveTo(-20*s,-130*s+bob); ctx.lineTo(-44*s,-38*s+bob+Math.sin(t/300)*5*s); ctx.lineTo(-6*s,-48*s+bob); ctx.closePath(); ctx.fill(); }
+  /* body / dress */
+  if(def.skirt||def.sari){
+    ctx.fillStyle=def.shirt; ctx.beginPath(); ctx.moveTo(-15*s,-128*s+bob); ctx.lineTo(15*s,-128*s+bob); ctx.lineTo(30*s,-48*s+bob); ctx.lineTo(-30*s,-48*s+bob); ctx.closePath(); ctx.fill();
+    if(def.sari){ ctx.strokeStyle='#ffd94d'; ctx.lineWidth=5*s; ctx.beginPath(); ctx.moveTo(-14*s,-126*s+bob); ctx.lineTo(16*s,-84*s+bob); ctx.stroke(); }
+  } else {
+    ctx.fillStyle=def.shirt; rr(ctx,-22*s,-132*s+bob,44*s,76*s,12*s); ctx.fill();
+    if(def.vest){ ctx.fillStyle=def.vestColor||'#5b3a1e'; rr(ctx,-22*s,-132*s+bob,13*s,76*s,8*s); ctx.fill(); rr(ctx,9*s,-132*s+bob,13*s,76*s,8*s); ctx.fill(); }
+  }
+  /* uniform details: stripes (chor), reflective bands (fire fighter), camo (fauji), white coat (doctor/scientist) */
+  if(def.stripes){ ctx.fillStyle='#111827'; [-112,-92,-72].forEach(function(yy){ ctx.fillRect(-21*s,(yy)*s+bob,42*s,8*s); }); }
+  if(def.reflective){ ctx.fillStyle='#facc15'; ctx.fillRect(-22*s,-104*s+bob,44*s,8*s); ctx.fillRect(-22*s,-76*s+bob,44*s,8*s); }
+  if(def.camo){ ctx.fillStyle='#3f6212'; [[-12,-118,9],[8,-108,8],[-4,-84,10],[13,-124,7]].forEach(function(b){ ctx.beginPath(); ctx.ellipse(b[0]*s,b[1]*s+bob,b[2]*s,b[2]*0.6*s,0.4,0,7); ctx.fill(); }); ctx.fillStyle='#854d0e'; [[-14,-96,6],[12,-90,6]].forEach(function(b){ ctx.beginPath(); ctx.ellipse(b[0]*s,b[1]*s+bob,b[2]*s,b[2]*0.6*s,-0.3,0,7); ctx.fill(); }); }
+  if(def.coat){ ctx.fillStyle='#f8fafc'; rr(ctx,-22*s,-132*s+bob,17*s,78*s,8*s); ctx.fill(); rr(ctx,5*s,-132*s+bob,17*s,78*s,8*s); ctx.fill(); ctx.fillStyle='#e2e8f0'; rr(ctx,-22*s,-132*s+bob,17*s,12*s,6*s); ctx.fill(); rr(ctx,5*s,-132*s+bob,17*s,12*s,6*s); ctx.fill(); }
+  /* arms */
+  ctx.strokeStyle=def.skin; ctx.lineWidth=12*s;
+  var waveArm = anim==='wave' ? Math.sin(t/160)*14*s : 0;
+  ctx.beginPath(); ctx.moveTo(-20*s,-122*s+bob);
+  if(anim==='talk'){ ctx.lineTo(-36*s,-92*s+bob+Math.sin(t/220)*5*s); } else { ctx.lineTo(-30*s,-72*s+bob); }
+  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(20*s,-122*s+bob);
+  if(anim==='wave'){ ctx.lineTo(42*s,-158*s+bob+waveArm*0.4); }
+  else if(anim==='walk'){ ctx.lineTo(30*s,-76*s+bob-legSwing*0.6); }
+  else if(anim==='talk'){ ctx.lineTo(38*s,-98*s+bob+Math.cos(t/200)*5*s); }
+  else { ctx.lineTo(30*s,-72*s+bob); }
+  ctx.stroke();
+  /* head */
+  ctx.fillStyle=def.skin; ctx.beginPath(); ctx.arc(0,hy,27*s,0,7); ctx.fill();
+  /* hair / headgear */
+  ctx.fillStyle=def.hair;
+  if(def.hairStyle==='short'){ ctx.beginPath(); ctx.arc(0,hy-6*s,27*s,Math.PI*1.02,Math.PI*1.98); ctx.lineTo(0,hy-6*s); ctx.fill(); rr(ctx,-27*s,hy-10*s,54*s,9*s,4*s); ctx.fill(); }
+  else if(def.hairStyle==='ponytail'){ ctx.beginPath(); ctx.arc(0,hy-7*s,27*s,Math.PI,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(-26*s,hy+16*s,8*s,26*s,0.25,0,7); ctx.fill(); }
+  else if(def.hairStyle==='bun'){ ctx.beginPath(); ctx.arc(0,hy-7*s,27*s,Math.PI,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(0,hy-30*s,10*s,0,7); ctx.fill(); }
+  else if(def.hairStyle==='turban'){ ctx.fillStyle='#f97316'; ctx.beginPath(); ctx.ellipse(0,hy-17*s,29*s,15*s,0,Math.PI,Math.PI*2); ctx.fill(); rr(ctx,-29*s,hy-19*s,58*s,8*s,4*s); ctx.fill(); ctx.fillStyle='#ffd94d'; ctx.beginPath(); ctx.arc(0,hy-28*s,6*s,0,7); ctx.fill(); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='cap'||def.hairStyle==='policecap'){ ctx.fillStyle= def.hairStyle==='cap' ? '#374151':'#1e3a8a'; ctx.beginPath(); ctx.ellipse(0,hy-15*s,28*s,13*s,0,Math.PI,Math.PI*2); ctx.fill(); rr(ctx,2*s,hy-17*s,34*s,6*s,3*s); ctx.fill(); }
+  else if(def.hairStyle==='crown'){ ctx.fillStyle='#f5c542'; ctx.beginPath(); ctx.moveTo(-22*s,hy-22*s); ctx.lineTo(-22*s,hy-40*s); ctx.lineTo(-11*s,hy-28*s); ctx.lineTo(0,hy-44*s); ctx.lineTo(11*s,hy-28*s); ctx.lineTo(22*s,hy-40*s); ctx.lineTo(22*s,hy-22*s); ctx.closePath(); ctx.fill(); }
+  else if(def.hairStyle==='bald'){ ctx.beginPath(); ctx.arc(-24*s,hy-8*s,7*s,0,7); ctx.arc(24*s,hy-8*s,7*s,0,7); ctx.fill(); }
+  else if(def.hairStyle==='firehelmet'){ ctx.beginPath(); ctx.arc(0,hy-6*s,27*s,Math.PI,Math.PI*2); ctx.fill(); ctx.fillStyle='#dc2626'; ctx.beginPath(); ctx.ellipse(0,hy-14*s,30*s,17*s,0,Math.PI,Math.PI*2); ctx.fill(); rr(ctx,-34*s,hy-16*s,68*s,7*s,3*s); ctx.fill(); ctx.fillStyle='#facc15'; rr(ctx,-5*s,hy-30*s,10*s,15*s,3*s); ctx.fill(); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='chefhat'){ ctx.beginPath(); ctx.arc(0,hy-7*s,27*s,Math.PI,Math.PI*2); ctx.fill(); ctx.fillStyle='#f8fafc'; rr(ctx,-17*s,hy-52*s,34*s,26*s,6*s); ctx.fill(); ctx.beginPath(); ctx.arc(-12*s,hy-50*s,10*s,0,7); ctx.arc(0*s,hy-55*s,12*s,0,7); ctx.arc(12*s,hy-50*s,10*s,0,7); ctx.fill(); rr(ctx,-20*s,hy-30*s,40*s,7*s,3*s); ctx.fill(); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='hardhat'){ ctx.beginPath(); ctx.arc(0,hy-7*s,27*s,Math.PI,Math.PI*2); ctx.fill(); ctx.fillStyle='#facc15'; ctx.beginPath(); ctx.ellipse(0,hy-15*s,28*s,14*s,0,Math.PI,Math.PI*2); ctx.fill(); rr(ctx,-32*s,hy-17*s,64*s,6*s,3*s); ctx.fill(); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='armycap'){ ctx.fillStyle='#365314'; ctx.beginPath(); ctx.ellipse(0,hy-16*s,28*s,12*s,0,Math.PI,Math.PI*2); ctx.fill(); rr(ctx,0,hy-18*s,36*s,6*s,3*s); ctx.fill(); }
+  else if(def.hairStyle==='pilotcap'){ ctx.fillStyle='#1e293b'; ctx.beginPath(); ctx.ellipse(0,hy-15*s,28*s,13*s,0,Math.PI,Math.PI*2); ctx.fill(); rr(ctx,2*s,hy-17*s,34*s,6*s,3*s); ctx.fill(); ctx.fillStyle='#facc15'; rr(ctx,-28*s,hy-21*s,56*s,4*s,2*s); ctx.fill(); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='nurse'){ ctx.fillStyle=def.hair; ctx.beginPath(); ctx.arc(0,hy-7*s,27*s,Math.PI,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(0,hy-29*s,9*s,0,7); ctx.fill(); ctx.fillStyle='#f8fafc'; rr(ctx,-13*s,hy-36*s,26*s,11*s,4*s); ctx.fill(); ctx.fillStyle='#dc2626'; ctx.fillRect(-2*s,hy-34*s,4*s,7*s); ctx.fillRect(-3.5*s,hy-32.5*s,7*s,4*s); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='judgewig'){ ctx.fillStyle='#e5e7eb'; ctx.beginPath(); ctx.ellipse(0,hy-12*s,29*s,18*s,0,Math.PI,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(-27*s,hy+4*s,8*s,0,7); ctx.arc(-27*s,hy+16*s,7*s,0,7); ctx.arc(27*s,hy+4*s,8*s,0,7); ctx.arc(27*s,hy+16*s,7*s,0,7); ctx.fill(); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='netacap'){ ctx.fillStyle='#f8fafc'; ctx.beginPath(); ctx.moveTo(-20*s,hy-20*s); ctx.lineTo(-14*s,hy-34*s); ctx.lineTo(16*s,hy-34*s); ctx.lineTo(22*s,hy-20*s); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#d6d3cd'; ctx.lineWidth=1.5*s; ctx.stroke(); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='beanie'){ ctx.fillStyle='#111827'; ctx.beginPath(); ctx.ellipse(0,hy-14*s,28*s,14*s,0,Math.PI,Math.PI*2); ctx.fill(); rr(ctx,-28*s,hy-18*s,56*s,7*s,3*s); ctx.fill(); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='wild'){ ctx.fillStyle='#e5e7eb'; ctx.beginPath(); ctx.moveTo(-24*s,hy-14*s); ctx.lineTo(-20*s,hy-36*s); ctx.lineTo(-10*s,hy-24*s); ctx.lineTo(-4*s,hy-40*s); ctx.lineTo(4*s,hy-25*s); ctx.lineTo(12*s,hy-38*s); ctx.lineTo(18*s,hy-22*s); ctx.lineTo(24*s,hy-30*s); ctx.lineTo(25*s,hy-12*s); ctx.closePath(); ctx.fill(); ctx.fillStyle=def.hair; }
+  else if(def.hairStyle==='policewoman'){ ctx.fillStyle=def.hair; ctx.beginPath(); ctx.ellipse(-24*s,hy+14*s,7*s,20*s,0.2,0,7); ctx.fill(); ctx.fillStyle='#6b5320'; ctx.beginPath(); ctx.ellipse(0,hy-15*s,28*s,13*s,0,Math.PI,Math.PI*2); ctx.fill(); rr(ctx,2*s,hy-17*s,34*s,6*s,3*s); ctx.fill(); ctx.fillStyle='#dc2626'; rr(ctx,-28*s,hy-20*s,56*s,3.5*s,2*s); ctx.fill(); ctx.fillStyle=def.hair; }
+  /* beard / mustache */
+  if(def.beard){ ctx.fillStyle='#f2f2f2'; ctx.beginPath(); ctx.ellipse(0,hy+17*s,17*s,15*s,0,0,Math.PI); ctx.fill(); ctx.beginPath(); ctx.arc(0,hy+10*s,16*s,0.15*Math.PI,0.85*Math.PI); ctx.fill(); }
+  if(def.mustache){ ctx.fillStyle='#2b2b2b'; ctx.beginPath(); ctx.ellipse(-7*s,hy+11*s,8*s,3.4*s,-0.25,0,7); ctx.ellipse(7*s,hy+11*s,8*s,3.4*s,0.25,0,7); ctx.fill(); }
+  /* eyes */
+  ctx.fillStyle='#1c1c22';
+  if(sleeping||anim==='sleep'){ ctx.strokeStyle='#1c1c22'; ctx.lineWidth=2.4*s; ctx.beginPath(); ctx.moveTo(-13*s,hy+1*s); ctx.quadraticCurveTo(-8*s,hy+5*s,-3*s,hy+1*s); ctx.moveTo(3*s,hy+1*s); ctx.quadraticCurveTo(8*s,hy+5*s,13*s,hy+1*s); ctx.stroke(); }
+  else { ctx.beginPath(); ctx.arc(-9*s,hy,3.1*s,0,7); ctx.arc(9*s,hy,3.1*s,0,7); ctx.fill(); }
+  if(def.glasses){ ctx.strokeStyle='#222'; ctx.lineWidth=2.4*s; ctx.strokeRect(-19*s,hy-8*s,16*s,15*s); ctx.strokeRect(3*s,hy-8*s,16*s,15*s); ctx.beginPath(); ctx.moveTo(-3*s,hy-2*s); ctx.lineTo(3*s,hy-2*s); ctx.stroke(); }
+  if(def.sunglasses){ ctx.fillStyle='#111827'; rr(ctx,-19*s,hy-8*s,16*s,13*s,4*s); ctx.fill(); rr(ctx,3*s,hy-8*s,16*s,13*s,4*s); ctx.fill(); ctx.fillRect(-3*s,hy-4*s,6*s,3*s); }
+  if(def.eyeMask){ ctx.fillStyle='#111827'; rr(ctx,-27*s,hy-9*s,54*s,15*s,7*s); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(-9*s,hy-1*s,4.6*s,0,7); ctx.arc(9*s,hy-1*s,4.6*s,0,7); ctx.fill(); ctx.fillStyle='#1c1c22'; ctx.beginPath(); ctx.arc(-9*s,hy-1*s,2.2*s,0,7); ctx.arc(9*s,hy-1*s,2.2*s,0,7); ctx.fill(); }
+  /* mouth */
+  var mo=mouthOpen(talking,t);
+  if(mo>0){ ctx.fillStyle='#7a2e1d'; ctx.beginPath(); ctx.ellipse(0,hy+15*s,6.5*s,mo*0.62*s,0,0,7); ctx.fill(); }
+  else if(!def.beard){ ctx.strokeStyle='#7a2e1d'; ctx.lineWidth=2.4*s; ctx.beginPath(); ctx.arc(0,hy+10*s,8*s,0.15*Math.PI,0.85*Math.PI); ctx.stroke(); }
+  ctx.lineWidth=1; ctx.lineCap='butt';
+  /* chest tools / props — stethoscope, badge, shoulder bag, tilak */
+  if(def.tool==='stethoscope'){ ctx.strokeStyle='#111827'; ctx.lineWidth=3.5*s; ctx.beginPath(); ctx.moveTo(-11*s,-128*s+bob); ctx.quadraticCurveTo(-10*s,-96*s+bob, 2*s,-88*s+bob); ctx.stroke(); ctx.beginPath(); ctx.moveTo(11*s,-128*s+bob); ctx.quadraticCurveTo(10*s,-104*s+bob, 2*s,-88*s+bob); ctx.stroke(); ctx.fillStyle='#374151'; ctx.beginPath(); ctx.arc(3*s,-86*s+bob,6*s,0,7); ctx.fill(); ctx.fillStyle='#e5e7eb'; ctx.beginPath(); ctx.arc(3*s,-86*s+bob,3*s,0,7); ctx.fill(); ctx.lineWidth=1; }
+  if(def.badge){ ctx.fillStyle='#facc15'; ctx.beginPath(); ctx.arc(-13*s,-112*s+bob,6*s,0,7); ctx.fill(); ctx.fillStyle='#b45309'; ctx.font='800 '+Math.round(10*s)+'px Hind, sans-serif'; ctx.textAlign='center'; ctx.fillText('★', -13*s, -108*s+bob); ctx.textAlign='left'; }
+  if(def.tool==='bag'){ ctx.strokeStyle='#7c4a21'; ctx.lineWidth=6*s; ctx.beginPath(); ctx.moveTo(-18*s,-126*s+bob); ctx.lineTo(20*s,-66*s+bob); ctx.stroke(); ctx.fillStyle='#92400e'; rr(ctx,10*s,-72*s+bob,24*s,20*s,4*s); ctx.fill(); ctx.lineWidth=1; }
+  if(def.id==='pandit'){ ctx.fillStyle='#dc2626'; ctx.fillRect(-2*s,hy-14*s,4*s,12*s); }
+  if(anim==='sleep'){ drawZzz(ctx, 30*s, hy-46*s, s, t); }
+}
+function drawZzz(ctx,x,y,s,t){
+  ctx.fillStyle='#3b6ea5'; ctx.font='800 '+Math.round(20*s)+'px Hind, sans-serif';
+  for(var i=0;i<3;i++){ var off=((t/900 + i*0.33)%1); ctx.globalAlpha=1-off*0.7; ctx.fillText('Z', x+i*15*s, y - off*36*s + i*-8*s); }
+  ctx.globalAlpha=1;
+}
+function drawMonkey(ctx,s,anim,t,talking){
+  var bob = anim==='walk' ? Math.abs(Math.sin(t/160))*6*s : Math.sin(t/420)*3*s;
+  var gy=0;
+  /* tail */
+  ctx.strokeStyle='#8a5a2b'; ctx.lineWidth=8*s; ctx.beginPath(); ctx.moveTo(-24*s,-58*s+bob); ctx.quadraticCurveTo(-58*s,-70*s+bob+Math.sin(t/300)*8*s,-52*s,-112*s+bob); ctx.stroke();
+  /* legs */
+  ctx.strokeStyle='#8a5a2b'; ctx.lineWidth=12*s; ctx.lineCap='round';
+  var sw= anim==='walk'? Math.sin(t/170)*13*s:0;
+  ctx.beginPath(); ctx.moveTo(-10*s,-46*s+bob); ctx.lineTo(-12*s+sw,-3*s); ctx.moveTo(10*s,-46*s+bob); ctx.lineTo(12*s-sw,-3*s); ctx.stroke();
+  /* body */
+  ctx.fillStyle='#a0662c'; ctx.beginPath(); ctx.ellipse(0,-78*s+bob,27*s,34*s,0,0,7); ctx.fill();
+  ctx.fillStyle='#e8c48f'; ctx.beginPath(); ctx.ellipse(0,-70*s+bob,16*s,21*s,0,0,7); ctx.fill();
+  /* arms */
+  ctx.strokeStyle='#8a5a2b'; ctx.lineWidth=10*s;
+  ctx.beginPath(); ctx.moveTo(-24*s,-96*s+bob);
+  if(anim==='wave'){ ctx.lineTo(-44*s,-136*s+bob+Math.sin(t/160)*7*s); } else { ctx.lineTo(-38*s,-58*s+bob+sw*0.6); }
+  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(24*s,-96*s+bob);
+  if(anim==='talk'){ ctx.lineTo(42*s,-84*s+bob+Math.sin(t/210)*6*s); } else { ctx.lineTo(38*s,-58*s+bob-sw*0.6); }
+  ctx.stroke();
+  /* ears + head */
+  ctx.fillStyle='#a0662c'; ctx.beginPath(); ctx.arc(-27*s,-128*s+bob,10*s,0,7); ctx.arc(27*s,-128*s+bob,10*s,0,7); ctx.fill();
+  ctx.fillStyle='#e8c48f'; ctx.beginPath(); ctx.arc(-27*s,-128*s+bob,5.5*s,0,7); ctx.arc(27*s,-128*s+bob,5.5*s,0,7); ctx.fill();
+  ctx.fillStyle='#a0662c'; ctx.beginPath(); ctx.arc(0,-130*s+bob,26*s,0,7); ctx.fill();
+  ctx.fillStyle='#f0d3a0'; ctx.beginPath(); ctx.ellipse(0,-124*s+bob,19*s,16*s,0,0,7); ctx.fill();
+  ctx.fillStyle='#1c1c22';
+  if(anim==='sleep'){ ctx.strokeStyle='#1c1c22'; ctx.lineWidth=2.2*s; ctx.beginPath(); ctx.moveTo(-13*s,-133*s+bob); ctx.lineTo(-4*s,-133*s+bob); ctx.moveTo(4*s,-133*s+bob); ctx.lineTo(13*s,-133*s+bob); ctx.stroke(); }
+  else { ctx.beginPath(); ctx.arc(-8*s,-134*s+bob,3*s,0,7); ctx.arc(8*s,-134*s+bob,3*s,0,7); ctx.fill(); }
+  var mo=mouthOpen(talking,t);
+  if(mo>0){ ctx.fillStyle='#7a2e1d'; ctx.beginPath(); ctx.ellipse(0,-116*s+bob,7*s,mo*0.6*s,0,0,7); ctx.fill(); }
+  else { ctx.strokeStyle='#7a2e1d'; ctx.lineWidth=2.2*s; ctx.beginPath(); ctx.arc(0,-120*s+bob,8*s,0.15*Math.PI,0.85*Math.PI); ctx.stroke(); }
+  ctx.lineWidth=1; ctx.lineCap='butt';
+  if(anim==='sleep') drawZzz(ctx,32*s,-168*s+bob,s,t);
+  if(anim==='sit'){ /* sit: lower body hint */ ctx.fillStyle='#8a5a2b'; ctx.beginPath(); ctx.ellipse(0,-8*s,30*s,9*s,0,0,7); ctx.fill(); }
+}
+function drawCroc(ctx,s,anim,t,talking){
+  var bobY = anim==='walk'? Math.sin(t/200)*2.5*s : 0;
+  var jaw = talking ? (Math.abs(Math.sin(t/260))*9*s) : (anim==='talk'?4*s:2*s);
+  ctx.save(); ctx.translate(0,-6*s+bobY); ctx.scale(1.25,1.25);
+  /* tail */
+  ctx.fillStyle='#2e8b3a'; ctx.beginPath(); ctx.moveTo(-58*s,-26*s); ctx.lineTo(-112*s,-12*s+Math.sin(t/350)*4*s); ctx.lineTo(-56*s,-6*s); ctx.closePath(); ctx.fill();
+  /* body */
+  ctx.beginPath(); ctx.ellipse(-6*s,-24*s,62*s,21*s,0,0,7); ctx.fill();
+  ctx.fillStyle='#8fd07a'; ctx.beginPath(); ctx.ellipse(-2*s,-16*s,52*s,11*s,0,0,7); ctx.fill();
+  /* back spikes */
+  ctx.fillStyle='#1f6b2a'; for(var i=0;i<6;i++){ var bx=(-52+i*15)*s; ctx.beginPath(); ctx.moveTo(bx,-40*s); ctx.lineTo(bx+6*s,-52*s); ctx.lineTo(bx+12*s,-40*s); ctx.closePath(); ctx.fill(); }
+  /* legs */
+  ctx.fillStyle='#2e8b3a'; var st= anim==='walk'? Math.sin(t/170)*5*s:0;
+  [[-38,-6,1],[30,-6,-1]].forEach(function(L){ ctx.save(); ctx.translate(L[0]*s,-8*s); ctx.rotate(L[2]*st*0.03); rr(ctx,-6*s,0,13*s,14*s,5*s); ctx.fill(); ctx.restore(); });
+  /* head + snout */
+  ctx.fillStyle='#2e8b3a'; ctx.beginPath(); ctx.ellipse(52*s,-32*s,20*s,14*s,0,0,7); ctx.fill();
+  rr(ctx,58*s,-30*s,58*s,11*s,5*s); ctx.fill(); /* upper jaw */
+  ctx.save(); ctx.translate(58*s,-19*s); ctx.rotate(jaw*0.012); ctx.fillStyle='#2e8b3a'; rr(ctx,0,-3*s,54*s,8*s,4*s); ctx.fill(); ctx.restore(); /* lower jaw */
+  /* teeth */
+  ctx.fillStyle='#fff'; for(var d=0;d<5;d++){ var tx=(66+d*10)*s; ctx.beginPath(); ctx.moveTo(tx,-19*s); ctx.lineTo(tx+4*s,-19*s); ctx.lineTo(tx+2*s,-13*s); ctx.closePath(); ctx.fill(); }
+  /* eye */
+  ctx.fillStyle='#2e8b3a'; ctx.beginPath(); ctx.arc(48*s,-46*s,7*s,0,7); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(48*s,-46*s,5*s,0,7); ctx.fill();
+  ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(49*s,-46*s,2.6*s,0,7); ctx.fill();
+  if(anim==='sleep'){ ctx.fillStyle='#111'; ctx.fillRect(43*s,-48*s,10*s,2.4*s); drawZzz(ctx,64*s,-70*s,s*0.9,t); }
+  ctx.restore();
+}
+function drawCustomChar(ctx,s,anim,t,talking,def,img){
+  var bob = anim==='walk'? Math.abs(Math.sin(t/160))*5*s : Math.sin(t/450)*3*s;
+  /* simple body in custom color */
+  ctx.fillStyle=def.shirt||'#e0245e'; rr(ctx,-22*s,-128*s+bob,44*s,72*s,12*s); ctx.fill();
+  ctx.strokeStyle='#caa27e'; ctx.lineWidth=11*s; ctx.lineCap='round';
+  var sw= anim==='walk'? Math.sin(t/170)*13*s:0;
+  ctx.strokeStyle='#374151'; ctx.beginPath(); ctx.moveTo(-9*s,-56*s+bob); ctx.lineTo(-9*s+sw,-3*s); ctx.moveTo(9*s,-56*s+bob); ctx.lineTo(9*s-sw,-3*s); ctx.stroke();
+  ctx.strokeStyle='#caa27e'; ctx.beginPath(); ctx.moveTo(20*s,-118*s+bob);
+  if(anim==='wave'){ ctx.lineTo(40*s,-152*s+bob+Math.sin(t/160)*7*s); } else { ctx.lineTo(30*s,-72*s+bob); }
+  ctx.moveTo(-20*s,-118*s+bob); ctx.lineTo(-30*s,-72*s+bob); ctx.stroke();
+  if(img && img.complete && img.naturalWidth){
+    ctx.save(); ctx.beginPath(); ctx.arc(0,-152*s+bob,27*s,0,7); ctx.clip();
+    ctx.drawImage(img,-27*s,-179*s+bob,54*s,54*s); ctx.restore();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=3*s; ctx.beginPath(); ctx.arc(0,-152*s+bob,27*s,0,7); ctx.stroke();
+  } else {
+    ctx.fillStyle='#f2c09a'; ctx.beginPath(); ctx.arc(0,-152*s+bob,27*s,0,7); ctx.fill();
+    ctx.fillStyle='#222'; ctx.font='800 '+Math.round(26*s)+'px Hind, sans-serif'; ctx.textAlign='center';
+    ctx.fillText((def.name||'?').charAt(0).toUpperCase(), 0, -142*s+bob); ctx.textAlign='left';
+  }
+  ctx.lineWidth=1; ctx.lineCap='butt';
+  if(anim==='sleep') drawZzz(ctx,30*s,-196*s+bob,s,t);
+}
+</script>
+<script>
+"use strict";
+/* ================= SCENE COMPOSITE DRAW ================= */
+var customImgCache={};
+function getCustomDef(charRef){
+  if(!current||!current.customChars) return null;
+  for(var i=0;i<current.customChars.length;i++) if(current.customChars[i].id===charRef) return current.customChars[i];
+  return null;
+}
+function resolveDef(charRef){
+  var b=charById(charRef); if(b) return b;
+  var c=getCustomDef(charRef);
+  if(c) return {id:c.id, name:c.name, kind:'custom', shirt:c.color, desc:c.desc, voice:c.voiceObj};
+  return CHARACTERS[0];
+}
+function resolveImg(charRef){
+  var c=getCustomDef(charRef); if(!c||!c.img) return null;
+  if(!customImgCache[charRef]){ var im=new Image(); im.src=c.img; customImgCache[charRef]=im; }
+  return customImgCache[charRef];
+}
+function speakerNameOf(scene){
+  if(scene.speaker) return scene.speaker;
+  return 'Narrator';
+}
+function wrapText(ctx,text,maxW){
+  var words=String(text||'').split(/\s+/); var lines=[]; var line='';
+  words.forEach(function(w){ var test=line?line+' '+w:w; if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; } else line=test; });
+  if(line) lines.push(line); return lines;
+}
+function drawScene(ctx,W,H,scene,progress,t,talkingCharId){
+  drawBackground(ctx,W,H,scene.bg,t);
+  var gy=H*0.78;
+  var isPortrait = H>W;
+  var s = (H/720) * (isPortrait? 1.25 : 1.12);
+  var chars=scene.chars||[];
+  var positions=[];
+  if(chars.length===1){
+    var c0=chars[0];
+    var cx = c0.pos==='left'? W*0.3 : (c0.pos==='right'? W*0.7 : W*0.5);
+    if(c0.anim==='walk'){ cx = W*0.18 + progress*W*0.6; }
+    positions=[{def:resolveDef(c0.charId), img:resolveImg(c0.charId), x:cx, flip:false, c:c0}];
+  } else if(chars.length>=2){
+    chars.slice(0,2).forEach(function(c,i){
+      var cx2 = i===0? W*0.28 : W*0.72;
+      if(c.anim==='walk'){ cx2 = (i===0? W*0.1+progress*W*0.3 : W*0.9-progress*W*0.3); }
+      positions.push({def:resolveDef(c.charId), img:resolveImg(c.charId), x:cx2, flip: i===1, c:c});
+    });
+  }
+  /* shadows */
+  positions.forEach(function(p){ ctx.fillStyle='rgba(0,0,0,.16)'; ctx.beginPath(); ctx.ellipse(p.x, gy+10, 52*s*(p.def.kind==='croc'?1.5:1), 10*s,0,0,7); ctx.fill(); });
+  positions.forEach(function(p){
+    var talking = talkingCharId===p.c.charId || (talkingCharId==='__any__' && p.c.anim==='talk');
+    var cs = p.def.kind==='croc' ? s*1.05 : s;
+    drawCharacter(ctx, p.def, p.x, gy, cs, p.c.anim||'idle', t, !!talking, p.flip, p.img);
+  });
+  /* name tag */
+  if(chars.length){
+    ctx.font='700 '+Math.round(H*0.032)+'px Hind, sans-serif';
+    positions.forEach(function(p){
+      var nm=p.def.name; var wdt=ctx.measureText(nm).width+22;
+      ctx.fillStyle='rgba(255,255,255,.92)'; rr(ctx,p.x-wdt/2, gy-H*0.46, wdt, H*0.052, 10); ctx.fill();
+      ctx.fillStyle='#17401f'; ctx.textAlign='center'; ctx.fillText(nm, p.x, gy-H*0.425); ctx.textAlign='left';
+    });
+  }
+  /* on-screen text bar */
+  var txt=scene.onScreen||scene.dialogue||'';
+  if(txt){
+    ctx.font='700 '+Math.round(H*0.042)+'px "Noto Sans Devanagari", Hind, sans-serif';
+    var lines=wrapText(ctx, txt, W*0.86).slice(0,3);
+    var lh=H*0.058, bh=lines.length*lh+H*0.03;
+    ctx.fillStyle='rgba(8,18,10,.82)'; rr(ctx,W*0.05, H-bh-H*0.025, W*0.9, bh, 14); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.textAlign='center';
+    lines.forEach(function(ln,i){ ctx.fillText(ln, W/2, H-bh-H*0.025+lh*(i+0.78)); });
+    ctx.textAlign='left';
+  }
+  /* scene speaker label top-left */
+  ctx.font='700 '+Math.round(H*0.03)+'px Hind, sans-serif';
+  var lbl=speakerNameOf(scene); var lw=ctx.measureText(lbl).width+24;
+  ctx.fillStyle='rgba(11,122,55,.92)'; rr(ctx,16,16,lw,H*0.05,10); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.fillText(lbl, 28, 16+H*0.037);
+}
+
+/* still draw for editor / initial */
+var playState={ playing:false, idx:0, startAt:0, raf:0, speakingId:null, muted:false, recording:false };
+function currentScene(){ if(!current||!current.scenes.length) return null; return current.scenes[clamp(playState.idx,0,current.scenes.length-1)]; }
+function drawCurrentStill(){
+  var cv=document.getElementById('stage'); var ctx=cv.getContext('2d');
+  var sc=currentScene();
+  if(!sc){ ctx.fillStyle='#dcefe2'; ctx.fillRect(0,0,cv.width,cv.height); ctx.fillStyle='#40604a'; ctx.font='700 '+Math.round(cv.height*0.045)+'px Hind, sans-serif'; ctx.textAlign='center'; ctx.fillText('Script daal ke "Script se Video Banao" dabao', cv.width/2, cv.height/2); ctx.textAlign='left'; return; }
+  drawScene(ctx,cv.width,cv.height,sc,0.25,600,null);
+}
+</script>
+<script>
+"use strict";
+/* ================= AUTO PIPELINE ================= */
+function norm(s){ return String(s||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+function containsAny(text, arr){ for(var i=0;i<arr.length;i++){ if(arr[i] && text.indexOf(arr[i])>=0) return true; } return false; }
+function matchCharacterForSpeaker(speaker, locks){
+  var key=norm(speaker);
+  if(locks && locks[key]) return locks[key];
+  /* custom characters first: exact name match */
+  if(current && current.customChars){
+    for(var ci=0;ci<current.customChars.length;ci++){ if(norm(current.customChars[ci].name)===key) return current.customChars[ci].id; }
+  }
+  /* pass 1: exact name / english name match — sabse pakka */
+  for(var i0=0;i0<CHARACTERS.length;i0++){
+    var c0=CHARACTERS[i0];
+    if(norm(c0.name)===key || norm(c0.en)===key){ if(locks) locks[key]=c0.id; return c0.id; }
+  }
+  /* pass 2: sabse lamba keyword match jeetega — 'mahila police' > 'police', 'doctor didi' > 'doctor', 'police inspector' > 'police' */
+  var best=null, bestLen=-1;
+  for(var i=0;i<CHARACTERS.length;i++){
+    var c=CHARACTERS[i];
+    for(var k=0;k<c.keywords.length;k++){
+      var kw=c.keywords[k];
+      if(key===kw || key.indexOf(kw)>=0){ if(kw.length>bestLen){ best=c.id; bestLen=kw.length; } }
+    }
+  }
+  if(best){ if(locks) locks[key]=best; return best; }
+  /* pass 3: english name ke andar naam chhupa ho */
+  for(var i2=0;i2<CHARACTERS.length;i2++){
+    var c2=CHARACTERS[i2];
+    if(key.length>=3 && norm(c2.en).indexOf(key)>=0){ if(locks) locks[key]=c2.id; return c2.id; }
+  }
+  /* unknown speaker: stable hash pick among humans so lock never changes */
+  var humans=['aman','priya','doctor','nurse','inspector','chor','firefighter','soldier','pilot','chef','kisan','dukandar','maa','teacher','raja','sipahi','judge','vakil','neta','superhero','studentboy','studentgirl','guard','driver','engineer','scientist','postman','rani','dadi','raghunath','doctordidi','policewoman'];
+  var h=0; for(var j=0;j<key.length;j++) h=(h*31+key.charCodeAt(j))>>>0;
+  var pick=humans[h%humans.length]; if(locks) locks[key]=pick; return pick;
+}
+function detectMentioned(text){
+  var low=' '+norm(text)+' '; var found=[];
+  CHARACTERS.forEach(function(c){ for(var k=0;k<c.keywords.length;k++){ if(low.indexOf(c.keywords[k])>=0){ if(found.indexOf(c.id)<0) found.push(c.id); break; } } });
+  if(current && current.customChars){ current.customChars.forEach(function(c){ if(low.indexOf(norm(c.name))>=0 && found.indexOf(c.id)<0) found.push(c.id); }); }
+  return found;
+}
+function detectBg(text, fallback){
+  var low=norm(text);
+  for(var i=0;i<BACKGROUNDS.length;i++){ if(containsAny(low, BACKGROUNDS[i].keys)) return BACKGROUNDS[i].id; }
+  return fallback||'village';
+}
+function detectAnim(text){
+  var low=norm(text);
+  /* priority: sleep > walk > sit > wave > talk */
+  var order=['sleep','walk','sit','wave','talk'];
+  for(var o=0;o<order.length;o++){ for(var i=0;i<ANIMS.length;i++){ if(ANIMS[i].id===order[o] && containsAny(low, ANIMS[i].keys)) return order[o]; } }
+  return null;
+}
+function estimateDuration(text){
+  var words=String(text||'').trim().split(/\s+/).filter(Boolean).length;
+  return clamp(Math.round(3.5+words*0.42), 5, 10);
+}
+function parseScriptToScenes(text){
+  var lines=String(text||'').split(/\n+/).map(function(l){return l.trim();}).filter(Boolean);
+  var raw=[];
+  lines.forEach(function(line){
+    var m=line.match(/^([^:：]{1,32})[:：]\s*(.+)$/);
+    var speaker='Narrator', content=line;
+    if(m && m[1].trim().split(/\s+/).length<=3 && !/https?/.test(m[1])){ speaker=m[1].trim(); content=m[2].trim(); }
+    /* split long content into sentences */
+    var parts=content.match(/[^.!?।…]+[.!?।…]*/g)||[content];
+    parts=parts.map(function(p){return p.trim();}).filter(Boolean);
+    if(parts.length===1 || speaker!=='Narrator'){ raw.push({speaker:speaker, content:content}); }
+    else { parts.forEach(function(p){ raw.push({speaker:'Narrator', content:p}); }); }
+  });
+  var locks={}; if(current && current.locks) locks=current.locks;
+  var scenes=[]; var lastBg='village'; var lastMain=null;
+  raw.forEach(function(r, idx){
+    var isNarr = norm(r.speaker)==='narrator'||norm(r.speaker)==='sutradhar'||norm(r.speaker)==='voiceover';
+    var mentioned=detectMentioned(r.content+' '+r.speaker);
+    var bg=detectBg(r.content, lastBg); lastBg=bg;
+    var animDetected=detectAnim(r.content);
+    var chars=[]; var speakerCharId=null;
+    if(isNarr){
+      var vis=mentioned.slice(0,2);
+      if(!vis.length && lastMain) vis=[lastMain];
+      /* agar koi character mention hi nahi hai to khaali establishing shot rahega (sirf background + text) */
+      vis.forEach(function(cid,i){ chars.push({charId:cid, pos: vis.length===1?'center':(i===0?'left':'right'), anim: animDetected||'idle', auto:true}); });
+      speakerCharId=null;
+    } else {
+      speakerCharId=matchCharacterForSpeaker(r.speaker, locks);
+      chars.push({charId:speakerCharId, pos:'center', anim: animDetected||'talk', auto:true});
+      /* second character: mentioned other, or previous different speaker listening */
+      var other=mentioned.filter(function(id){return id!==speakerCharId;})[0];
+      if(!other && scenes.length){ var prev=raw[idx-1]; if(prev && norm(prev.speaker)!==norm(r.speaker) && norm(prev.speaker)!=='narrator'){ other=matchCharacterForSpeaker(prev.speaker, locks); } }
+      if(other){ chars[0].pos='left'; chars.push({charId:other, pos:'right', anim:'idle', auto:true}); }
+      lastMain=speakerCharId;
+    }
+    var voiceProfile = isNarr ? NARRATOR_VOICE : (resolveDef(speakerCharId||chars[0].charId).voice || NARRATOR_VOICE);
+    scenes.push({
+      id:uid(), speaker: isNarr?'Narrator':r.speaker, dialogue:r.content, onScreen:r.content,
+      bg:bg, chars:chars, duration:estimateDuration(r.content),
+      voice:{pitch:voiceProfile.pitch, rate:voiceProfile.rate, label:voiceProfile.label},
+      auto:{bg:true, char:true, anim:true, voice:true}
+    });
+  });
+  if(current) current.locks=locks;
+  return scenes;
+}
+function resetSteps(){ var ss=document.querySelectorAll('#pipeSteps .step'); for(var i=0;i<ss.length;i++){ ss[i].classList.remove('done'); ss[i].querySelector('.dot').textContent=String(i+1); } }
+function markStepsDone(){
+  var ss=document.querySelectorAll('#pipeSteps .step');
+  var delay=0;
+  ss.forEach(function(st){ setTimeout(function(){ st.classList.add('done'); st.querySelector('.dot').textContent='✓'; }, delay); delay+=130; });
+}
+function runAutoPipeline(scrollToPlayer){
+  if(!current){ toast('Pehle project banao'); return; }
+  var text=document.getElementById('scriptInput').value.trim();
+  if(!text){ toast('Pehle script paste karo — ya Sample Script Try Karo dabao'); return; }
+  stopPlayback();
+  current.script=text;
+  current.scenes=parseScriptToScenes(text);
+  selSceneId=current.scenes.length?current.scenes[0].id:null;
+  playState.idx=0;
+  markStepsDone(); renderScenes(); updateProgUI(); drawCurrentStill(); touch();
+  var nChars=Object.keys(current.locks||{}).length;
+  toast('Ho gaya! '+current.scenes.length+' scenes bane · '+nChars+' characters lock hue · Ab Play dabao');
+  if(scrollToPlayer!==false){ var el=document.getElementById('studioMain'); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); }
+}
+document.getElementById('btnAuto').addEventListener('click', function(){ runAutoPipeline(true); });
+document.getElementById('btnSampleDash').addEventListener('click', function(){ /* handled earlier? duplicate guard */ });
+</script>
+<script>
+"use strict";
+/* ================= SCENE LIST + EDITOR ================= */
+function animName(id){ for(var i=0;i<ANIMS.length;i++) if(ANIMS[i].id===id) return ANIMS[i].name; return id; }
+function renderScenes(){
+  var list=document.getElementById('sceneList'); var empty=document.getElementById('sceneEmpty');
+  if(!current){ list.innerHTML=''; return; }
+  empty.classList.toggle('hidden', current.scenes.length>0); list.innerHTML='';
+  current.scenes.forEach(function(sc, i){
+    var card=document.createElement('div'); card.className='scene-card'+(sc.id===selSceneId?' sel':''); card.setAttribute('draggable','true');
+    card.setAttribute('data-id', sc.id);
+    var charChips=sc.chars.map(function(c){ var d=resolveDef(c.charId); return '<span class="chip">'+esc(d.name)+' · '+esc(animName(c.anim))+'</span>'; }).join('');
+    card.innerHTML='<div class="top"><span class="num">Scene '+(i+1)+'</span>'+
+      '<span class="pill pill-auto">BG: '+esc(bgById(sc.bg).name)+' · Auto</span>'+
+      '<span class="pill pill-lock">🔒 Voice: '+esc(sc.voice.label||'')+'</span>'+
+      '<span class="chip">'+sc.duration+' sec</span></div>'+
+      '<div class="dlg">'+esc(sc.dialogue)+'</div>'+
+      '<div class="who">Speaker: <b>'+esc(sc.speaker)+'</b></div>'+
+      '<div class="chips">'+charChips+'</div>'+
+      '<div class="rowbtns">'+
+      '<button class="iconbtn" data-a="up" title="Upar">↑</button>'+
+      '<button class="iconbtn" data-a="down" title="Neeche">↓</button>'+
+      '<button class="iconbtn" data-a="play" title="Ye scene chalao">▶</button>'+
+      '<button class="iconbtn" data-a="dup" title="Copy">⧉</button>'+
+      '<button class="iconbtn" data-a="del" title="Delete">🗑</button></div>';
+    card.addEventListener('click', function(e){ if(e.target.closest('button')) return; selectScene(sc.id); });
+    card.querySelector('[data-a="up"]').addEventListener('click', function(){ moveScene(i,-1); });
+    card.querySelector('[data-a="down"]').addEventListener('click', function(){ moveScene(i,1); });
+    card.querySelector('[data-a="play"]').addEventListener('click', function(){ selectScene(sc.id); playFrom(i); });
+    card.querySelector('[data-a="dup"]').addEventListener('click', function(){ var c=JSON.parse(JSON.stringify(sc)); c.id=uid(); current.scenes.splice(i+1,0,c); touch(); renderScenes(); toast('Scene copy ho gaya'); });
+    card.querySelector('[data-a="del"]').addEventListener('click', function(){ current.scenes.splice(i,1); if(selSceneId===sc.id) selSceneId=current.scenes.length?current.scenes[0].id:null; touch(); renderScenes(); renderEditor(); drawCurrentStill(); updateProgUI(); });
+    card.addEventListener('dragstart', function(e){ e.dataTransfer.setData('text/plain', sc.id); });
+    card.addEventListener('dragover', function(e){ e.preventDefault(); });
+    card.addEventListener('drop', function(e){ e.preventDefault(); var dragId=e.dataTransfer.getData('text/plain'); reorderScene(dragId, sc.id); });
+    list.appendChild(card);
+  });
+  renderEditor();
+}
+function moveScene(i,dir){ if(!current) return; var j=i+dir; if(j<0||j>=current.scenes.length) return; var tmp=current.scenes[i]; current.scenes[i]=current.scenes[j]; current.scenes[j]=tmp; touch(); renderScenes(); }
+function reorderScene(dragId, targetId){ if(!current||dragId===targetId) return; var from=-1,to=-1; current.scenes.forEach(function(s,k){ if(s.id===dragId)from=k; if(s.id===targetId)to=k; }); if(from<0||to<0) return; var it=current.scenes.splice(from,1)[0]; current.scenes.splice(to,0,it); touch(); renderScenes(); }
+function selectScene(id){ selSceneId=id; playState.idx=current?current.scenes.findIndex(function(s){return s.id===id;}):0; if(playState.idx<0)playState.idx=0; renderScenes(); drawCurrentStill(); updateProgUI(); }
+document.getElementById('btnAddScene').addEventListener('click', function(){
+  if(!current) return;
+  var sc={id:uid(), speaker:'Narrator', dialogue:'Yahan apni line likho…', onScreen:'Yahan apni line likho…', bg:'village', chars:[{charId:'aman', pos:'center', anim:'talk', auto:false}], duration:6, voice:{pitch:NARRATOR_VOICE.pitch, rate:NARRATOR_VOICE.rate, label:NARRATOR_VOICE.label}, auto:{bg:false,char:false,anim:false,voice:false}};
+  current.scenes.push(sc); selSceneId=sc.id; touch(); renderScenes(); toast('Naya khaali scene jud gaya — neeche edit karo');
+});
+function allCharOptions(sel){
+  var out='';
+  CHARACTERS.forEach(function(c){ out+='<option value="'+c.id+'"'+(c.id===sel?' selected':'')+'>'+esc(c.name)+' ('+esc(c.en)+')</option>'; });
+  if(current&&current.customChars) current.customChars.forEach(function(c){ out+='<option value="'+c.id+'"'+(c.id===sel?' selected':'')+'>'+esc(c.name)+' (Custom)</option>'; });
+  return out;
+}
+function renderEditor(){
+  var card=document.getElementById('editorCard'); var body=document.getElementById('editorBody');
+  if(!current||!selSceneId){ card.classList.add('hidden'); return; }
+  var sc=null, idx=-1; current.scenes.forEach(function(s,i){ if(s.id===selSceneId){ sc=s; idx=i; } });
+  if(!sc){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  var c1=sc.chars[0]||{charId:'aman',pos:'center',anim:'talk'};
+  var c2=sc.chars[1]||null;
+  function autoPill(k){ return sc.auto&&sc.auto[k] ? '<span class="pill pill-auto">Auto</span>' : '<span class="pill pill-manual">Manual</span>'; }
+  var bgOpts=''; BACKGROUNDS.forEach(function(b){ bgOpts+='<option value="'+b.id+'"'+(b.id===sc.bg?' selected':'')+'>'+esc(b.name)+'</option>'; });
+  var animOpts=function(sel){ var o=''; ANIMS.forEach(function(a){ o+='<option value="'+a.id+'"'+(a.id===sel?' selected':'')+'>'+esc(a.name)+'</option>'; }); return o; };
+  var posOpts=function(sel){ return ['left','center','right'].map(function(p){ return '<option value="'+p+'"'+(p===sel?' selected':'')+'>'+p+'</option>'; }).join(''); };
+  body.innerHTML=
+   '<p class="sub">Scene '+(idx+1)+' · Speaker: <b>'+esc(sc.speaker)+'</b></p>'+
+   '<label class="flabel">Dialogue / Narration (jo bola jayega)</label><textarea class="inp" id="edDlg" rows="2">'+esc(sc.dialogue)+'</textarea>'+
+   '<label class="flabel">Screen par dikhne wala text</label><input class="inp" id="edOn" type="text" value="'+esc(sc.onScreen||'')+'">'+
+   '<label class="flabel">Background '+autoPill('bg')+'</label><select class="inp" id="edBg">'+bgOpts+'</select>'+
+   '<div class="two"><div><label class="flabel">Character 1 '+autoPill('char')+'</label><select class="inp" id="edC1">'+allCharOptions(c1.charId)+'</select></div>'+
+   '<div><label class="flabel">Position</label><select class="inp" id="edP1">'+posOpts(c1.pos)+'</select></div></div>'+
+   '<label class="flabel">Character 1 Animation '+autoPill('anim')+'</label><select class="inp" id="edA1">'+animOpts(c1.anim)+'</select>'+
+   '<div class="two"><div><label class="flabel">Character 2 (optional)</label><select class="inp" id="edC2"><option value="">— koi nahi —</option>'+allCharOptions(c2?c2.charId:'')+'</select></div>'+
+   '<div><label class="flabel">Character 2 Animation</label><select class="inp" id="edA2">'+animOpts(c2?c2.anim:'idle')+'</select></div></div>'+
+   '<label class="flabel">Awaaz — Pitch <span id="edPitchV">'+sc.voice.pitch+'</span> '+autoPill('voice')+'</label><input type="range" id="edPitch" min="0.4" max="2" step="0.05" value="'+sc.voice.pitch+'">'+
+   '<label class="flabel">Awaaz — Speed <span id="edRateV">'+sc.voice.rate+'</span></label><input type="range" id="edRate" min="0.5" max="1.6" step="0.05" value="'+sc.voice.rate+'">'+
+   '<label class="flabel">Scene Duration (second)</label><input type="range" id="edDur" min="3" max="12" step="1" value="'+sc.duration+'"><div class="small"><span id="edDurV">'+sc.duration+'</span> sec</div>'+
+   '<div class="btnrow"><button class="btn btn-green btn-sm" id="edSpeak" type="button">🔊 Is Scene ki Awaaz Suno</button>'+
+   '<button class="btn btn-ghost btn-sm" id="edReAuto" type="button">↺ Is Scene ko Wapas Auto Karo</button></div>';
+  function upd(){ touch(); renderScenesSoft(); drawCurrentStill(); }
+  function renderScenesSoft(){ /* re-render list but keep editor values by re-calling renderScenes would rebuild editor; instead only update list */
+    var keep=document.getElementById('edDlg'); renderScenes(); }
+  document.getElementById('edDlg').addEventListener('input', function(){ sc.dialogue=this.value; sc.onScreen=this.value; document.getElementById('edOn').value=this.value; touch(); drawCurrentStill(); });
+  document.getElementById('edOn').addEventListener('input', function(){ sc.onScreen=this.value; touch(); drawCurrentStill(); });
+  document.getElementById('edBg').addEventListener('change', function(){ sc.bg=this.value; sc.auto.bg=false; touch(); renderScenes(); drawCurrentStill(); });
+  document.getElementById('edC1').addEventListener('change', function(){ c1.charId=this.value; sc.auto.char=false; var d=resolveDef(c1.charId); if(d.voice && sc.auto.voice){ sc.voice.pitch=d.voice.pitch; sc.voice.rate=d.voice.rate; sc.voice.label=d.voice.label; } touch(); renderScenes(); drawCurrentStill(); });
+  document.getElementById('edP1').addEventListener('change', function(){ c1.pos=this.value; touch(); drawCurrentStill(); });
+  document.getElementById('edA1').addEventListener('change', function(){ c1.anim=this.value; sc.auto.anim=false; touch(); renderScenes(); drawCurrentStill(); });
+  document.getElementById('edC2').addEventListener('change', function(){ if(this.value){ if(sc.chars.length<2) sc.chars.push({charId:this.value,pos:'right',anim:'idle',auto:false}); else sc.chars[1].charId=this.value; if(sc.chars[0].pos==='center') sc.chars[0].pos='left'; } else { sc.chars=sc.chars.slice(0,1); if(sc.chars[0]) sc.chars[0].pos='center'; } sc.auto.char=false; touch(); renderScenes(); drawCurrentStill(); });
+  document.getElementById('edA2').addEventListener('change', function(){ if(sc.chars[1]){ sc.chars[1].anim=this.value; sc.auto.anim=false; touch(); renderScenes(); drawCurrentStill(); } });
+  document.getElementById('edPitch').addEventListener('input', function(){ sc.voice.pitch=parseFloat(this.value); sc.auto.voice=false; sc.voice.label='Custom pitch '+this.value; document.getElementById('edPitchV').textContent=this.value; touch(); });
+  document.getElementById('edRate').addEventListener('input', function(){ sc.voice.rate=parseFloat(this.value); sc.auto.voice=false; document.getElementById('edRateV').textContent=this.value; touch(); });
+  document.getElementById('edDur').addEventListener('input', function(){ sc.duration=parseInt(this.value,10); document.getElementById('edDurV').textContent=this.value; touch(); });
+  document.getElementById('edSpeak').addEventListener('click', function(){ speakScene(sc, null); });
+  document.getElementById('edReAuto').addEventListener('click', function(){
+    var fresh=parseScriptToScenes((sc.speaker==='Narrator'?'':sc.speaker+': ')+sc.dialogue);
+    if(fresh.length){ var f=fresh[0]; sc.bg=f.bg; sc.chars=f.chars; sc.voice=f.voice; sc.auto=f.auto; touch(); renderScenes(); drawCurrentStill(); toast('Scene wapas Auto ho gaya'); }
+  });
+}
+</script>
+<script>
+"use strict";
+/* ================= SPEECH (Hindi voices) ================= */
+var hindiVoice=null, anyVoice=null;
+function loadVoices(){
+  if(!('speechSynthesis' in window)) return;
+  var vs=window.speechSynthesis.getVoices();
+  hindiVoice=null; anyVoice=vs[0]||null;
+  for(var i=0;i<vs.length;i++){ if(/^hi/i.test(vs[i].lang)){ hindiVoice=vs[i]; break; } }
+  var st=document.getElementById('voiceStatus');
+  if(st){ st.textContent = hindiVoice ? ('Awaaz: Hindi voice mili — '+hindiVoice.name) : 'Awaaz: Hindi voice is device par nahi mili — default voice Hindi pitch/rate ke saath bolegi'; }
+}
+if('speechSynthesis' in window){ loadVoices(); window.speechSynthesis.onvoiceschanged=loadVoices; }
+function speakScene(scene, onDone){
+  if(playState.muted || !('speechSynthesis' in window) || !scene.dialogue){ if(onDone) onDone(false); return; }
+  try{
+    var u=new SpeechSynthesisUtterance(scene.dialogue);
+    u.lang='hi-IN'; if(hindiVoice) u.voice=hindiVoice; else if(anyVoice) u.voice=anyVoice;
+    u.pitch=clamp(scene.voice.pitch||1,0,2); u.rate=clamp(scene.voice.rate||1,0.5,2);
+    var done=false; var finish=function(spoke){ if(done) return; done=true; if(onDone) onDone(spoke); };
+    u.onend=function(){ finish(true); }; u.onerror=function(){ finish(false); };
+    playState.speakingId = scene.speaker==='Narrator' ? '__narrator__' : ((scene.chars&&scene.chars[0])?scene.chars[0].charId:null);
+    window.speechSynthesis.speak(u);
+    /* safety timeout: if speech hangs, continue by duration */
+    setTimeout(function(){ finish(true); }, (scene.duration*1000)+6000);
+  }catch(e){ if(onDone) onDone(false); }
+}
+function stopSpeech(){ if('speechSynthesis' in window){ try{ window.speechSynthesis.cancel(); }catch(e){} } playState.speakingId=null; }
+
+/* ================= PLAYBACK ENGINE ================= */
+function updateProgUI(){
+  var total=current?current.scenes.length:0;
+  var idx= total? clamp(playState.idx+1,1,total):0;
+  document.getElementById('progText').textContent='Scene '+idx+' / '+total+(total? ' · kul lagbhag '+current.scenes.reduce(function(a,s){return a+s.duration;},0)+' sec':'');
+  document.getElementById('progFill').style.width= total? ( (playState.idx)/total*100 )+'%':'0%';
+}
+function animateLoop(){
+  if(!playState.playing) return;
+  var cv=document.getElementById('stage'); var ctx=cv.getContext('2d');
+  var sc=currentScene(); if(!sc){ stopPlayback(); return; }
+  var now=performance.now();
+  var elapsed=(now-playState.startAt)/1000;
+  var prog=clamp(elapsed/sc.duration,0,1);
+  var talkId=null;
+  if(playState.speakingId && playState.speakingId!=='__narrator__') talkId=playState.speakingId;
+  else if(playState.speakingId==='__narrator__' && sc.chars.length) talkId='__none__';
+  drawScene(ctx,cv.width,cv.height,sc,prog,now, talkId==='__none__'?null:talkId);
+  document.getElementById('progFill').style.width= ((playState.idx+prog)/(current.scenes.length)*100)+'%';
+  if(elapsed>=sc.duration){ nextSceneAuto(); return; }
+  playState.raf=requestAnimationFrame(animateLoop);
+}
+function playFrom(idx){
+  if(!current||!current.scenes.length){ toast('Pehle script se scenes banao'); return; }
+  stopSpeech();
+  playState.playing=true; playState.idx=clamp(idx,0,current.scenes.length-1);
+  selSceneId=current.scenes[playState.idx].id;
+  playState.startAt=performance.now();
+  var sc=currentScene();
+  renderScenes(); updateProgUI();
+  speakScene(sc, null);
+  cancelAnimationFrame(playState.raf); playState.raf=requestAnimationFrame(animateLoop);
+  document.getElementById('btnPlay').textContent='▶ Chal Raha Hai…';
+}
+function nextSceneAuto(){
+  if(!playState.playing) return;
+  stopSpeech();
+  if(playState.idx>=current.scenes.length-1){ stopPlayback(); drawCurrentStill(); toast('Video khatm — ab Video Download Karo se file bana sakte ho'); return; }
+  playState.idx++; selSceneId=current.scenes[playState.idx].id;
+  playState.startAt=performance.now();
+  renderScenes(); updateProgUI();
+  speakScene(currentScene(), null);
+}
+function stopPlayback(){
+  playState.playing=false; cancelAnimationFrame(playState.raf); stopSpeech();
+  var b=document.getElementById('btnPlay'); if(b) b.textContent='▶ Play — Poori Video';
+  updateProgUI();
+}
+document.getElementById('btnPlay').addEventListener('click', function(){ if(playState.playing){ return; } playFrom(playState.idx>= (current?current.scenes.length-1:0) ? 0 : playState.idx); });
+document.getElementById('btnPause').addEventListener('click', function(){ stopPlayback(); drawCurrentStill(); });
+document.getElementById('btnPrev').addEventListener('click', function(){ if(!current||!current.scenes.length)return; stopPlayback(); playState.idx=clamp(playState.idx-1,0,current.scenes.length-1); selSceneId=current.scenes[playState.idx].id; renderScenes(); updateProgUI(); drawCurrentStill(); });
+document.getElementById('btnNext').addEventListener('click', function(){ if(!current||!current.scenes.length)return; stopPlayback(); playState.idx=clamp(playState.idx+1,0,current.scenes.length-1); selSceneId=current.scenes[playState.idx].id; renderScenes(); updateProgUI(); drawCurrentStill(); });
+document.getElementById('btnMute').addEventListener('click', function(){ playState.muted=!playState.muted; this.textContent= playState.muted? '🔇 Awaaz Off':'🔊 Awaaz On'; if(playState.muted) stopSpeech(); });
+
+/* ================= EXPORT ================= */
+document.getElementById('btnExportScript').addEventListener('click', function(){
+  if(!current){ toast('Pehle project kholo'); return; }
+  var txt=current.name+'\n'+'='.repeat(Math.min(40,current.name.length+4))+'\n\n';
+  current.scenes.forEach(function(sc,i){ txt+='[Scene '+(i+1)+' · '+bgById(sc.bg).name+' · '+sc.duration+'s]\n'+sc.speaker+': '+sc.dialogue+'\n\n'; });
+  var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(current.name||'script').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-')+'-script.txt'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },4000);
+  toast('Script download ho gayi');
+});
+document.getElementById('btnExportVideo').addEventListener('click', function(){
+  if(!current||!current.scenes.length){ toast('Pehle script se video banao — scenes hi nahi hain'); return; }
+  var cv=document.getElementById('stage');
+  if(!cv.captureStream || typeof MediaRecorder==='undefined'){ toast('Is browser me video recording support nahi hai — Chrome/Edge try karo'); return; }
+  stopPlayback();
+  var mime='video/webm';
+  ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].some(function(m){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(m)){ mime=m; return true; } return false; });
+  var stream=cv.captureStream(30);
+  var rec; try{ rec=new MediaRecorder(stream,{mimeType:mime, videoBitsPerSecond:5*1000*1000}); }catch(e){ toast('Recorder start nahi hua — dusra browser try karo'); return; }
+  var chunks=[]; rec.ondataavailable=function(e){ if(e.data&&e.data.size) chunks.push(e.data); };
+  var recBar=document.getElementById('recBar'); var recText=document.getElementById('recText');
+  var btnV=document.getElementById('btnExportVideo'); btnV.disabled=true;
+  recBar.classList.add('show');
+  rec.onstop=function(){
+    recBar.classList.remove('show'); btnV.disabled=false; playState.recording=false;
+    var blob=new Blob(chunks,{type:mime});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    var ext= mime.indexOf('mp4')>=0? 'mp4':'webm';
+    a.download=(current.name||'cartoon-video').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-')+'.'+ext; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },6000);
+    drawCurrentStill(); updateProgUI();
+    toast('Video download ho gayi! ('+Math.round(blob.size/1024)+' KB)');
+  };
+  playState.recording=true; rec.start(300);
+  /* record scene by scene with animation, no speech (speech can't be captured) */
+  var i=0; var ctx=cv.getContext('2d');
+  function recordScene(){
+    if(i>=current.scenes.length){ setTimeout(function(){ try{rec.stop();}catch(e){} },250); return; }
+    var sc=current.scenes[i]; playState.idx=i; selSceneId=sc.id; renderScenes(); updateProgUI();
+    recText.textContent='Scene '+(i+1)+' / '+current.scenes.length+' record ho raha hai';
+    var start=performance.now();
+    (function frame(){
+      var now=performance.now(); var el=(now-start)/1000; var prog=clamp(el/sc.duration,0,1);
+      var talk = sc.chars.length && sc.chars[0].anim==='talk' ? sc.chars[0].charId : null;
+      drawScene(ctx,cv.width,cv.height,sc,prog,now,talk);
+      document.getElementById('progFill').style.width=((i+prog)/current.scenes.length*100)+'%';
+      if(el<sc.duration && playState.recording){ requestAnimationFrame(frame); }
+      else { i++; recordScene(); }
+    })();
+  }
+  recordScene();
+});
+</script>
+<script>
+"use strict";
+/* ================= LIBRARY ================= */
+function renderMiniChar(canvas, def){
+  var ctx=canvas.getContext('2d'); var W=canvas.width,H=canvas.height;
+  var g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#bfe6f7'); g.addColorStop(0.72,'#bfe6f7'); g.addColorStop(0.72,'#7cc46a'); g.addColorStop(1,'#7cc46a');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  drawCharacter(ctx, def, W/2, H*0.94, H/300, 'idle', 700, false, false, null);
+}
+function renderMiniBg(canvas, bgId){
+  var ctx=canvas.getContext('2d'); drawBackground(ctx, canvas.width, canvas.height, bgId, 800);
+}
+function renderLibrary(){
+  var cl=document.getElementById('charLib'); cl.innerHTML='';
+  CHARACTERS.forEach(function(c){
+    var d=document.createElement('div'); d.className='libitem';
+    d.innerHTML='<canvas width="300" height="240"></canvas><div class="nm">'+esc(c.name)+' <span class="pill pill-lock">🔒 Locked</span></div><div class="ds">'+esc(c.desc)+'</div><div class="vc">🎙 '+esc(c.voice.label)+'</div>';
+    cl.appendChild(d); renderMiniChar(d.querySelector('canvas'), c);
+  });
+  var bl=document.getElementById('bgLib'); bl.innerHTML='';
+  BACKGROUNDS.forEach(function(b){
+    var d=document.createElement('div'); d.className='libitem';
+    d.innerHTML='<canvas width="300" height="190"></canvas><div class="nm">'+esc(b.name)+'</div><div class="ds">Auto keywords: '+esc(b.keys.slice(0,4).join(', '))+'</div>';
+    bl.appendChild(d); renderMiniBg(d.querySelector('canvas'), b.id);
+  });
+  renderCustomCharList();
+}
+function renderCustomCharList(){
+  var box=document.getElementById('customCharList'); if(!box) return; box.innerHTML='';
+  var all=[];
+  projects.forEach(function(p){ (p.customChars||[]).forEach(function(c){ all.push({c:c, p:p}); }); });
+  if(!all.length){ box.innerHTML='<div class="small">Abhi koi custom character nahi hai.</div>'; return; }
+  all.forEach(function(it){
+    var d=document.createElement('div'); d.className='card'; d.style.boxShadow='none'; d.style.padding='12px';
+    d.innerHTML='<div style="font-weight:700">'+esc(it.c.name)+' <span class="pill pill-fmt">Custom</span></div><div class="small">'+esc(it.c.desc||'')+' · Project: '+esc(it.p.name)+'</div>'+
+    (it.c.img? '<img src="'+it.c.img+'" alt="'+esc(it.c.name)+'" style="width:100%;height:110px;object-fit:cover;border-radius:8px;margin-top:8px">' : '<div style="height:60px;border-radius:8px;margin-top:8px;background:'+esc(it.c.color)+'"></div>');
+    box.appendChild(d);
+  });
+}
+window.__customCharsSync=function(){ renderCustomCharList(); };
+
+/* custom character add */
+var ccVoiceType='male', ccImgData='';
+document.getElementById('ccVoice').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return; ccVoiceType=b.getAttribute('data-v');
+  var bs=this.querySelectorAll('button'); for(var i=0;i<bs.length;i++) bs[i].classList.toggle('sel', bs[i]===b);
+});
+document.getElementById('ccImg').addEventListener('change', function(){
+  var f=this.files&&this.files[0]; if(!f){ ccImgData=''; return; }
+  var r=new FileReader(); r.onload=function(){ /* downscale to keep localStorage light */
+    var img=new Image(); img.onload=function(){ var cv=document.createElement('canvas'); var max=320; var sc=Math.min(1, max/Math.max(img.width,img.height)); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); ccImgData=cv.toDataURL('image/jpeg',0.82); toast('Photo ready hai'); }; img.src=r.result;
+  }; r.readAsDataURL(f);
+});
+document.getElementById('btnAddChar').addEventListener('click', function(){
+  var name=document.getElementById('ccName').value.trim();
+  if(!name){ toast('Character ka naam likho pehle'); return; }
+  if(!current){ /* silently create a holder project so user stays on Library view */
+    var holder=newProjectObj(name+' ka Project','16:9'); projects.unshift(holder); current=holder; saveAll();
+  }
+  var vmap={ male:{pitch:1.0,rate:0.95,label:'Custom Male'}, female:{pitch:1.5,rate:1.0,label:'Custom Female'}, child:{pitch:1.8,rate:1.1,label:'Custom Child'}, old:{pitch:0.62,rate:0.8,label:'Custom Old'} };
+  var c={ id:'custom_'+uid(), name:name, desc:document.getElementById('ccDesc').value.trim(), color:document.getElementById('ccColor').value, img:ccImgData||'', voiceObj:vmap[ccVoiceType]||vmap.male };
+  current.customChars.push(c);
+  /* lock this name to custom char for future auto runs */
+  current.locks[norm(name)]=c.id;
+  ccImgData=''; document.getElementById('ccImg').value=''; document.getElementById('ccName').value=''; document.getElementById('ccDesc').value='';
+  touch(); renderLibrary();
+  toast('"'+name+'" jud gaya — script me "'+name+': ..." likhne se yehi character aayega');
+});
+
+/* ================= INIT ================= */
+renderProjects();
+if(projects.length){ /* stay on dashboard; user picks */ }
+drawCurrentStill();
+</script>
+</body>
+</html>
